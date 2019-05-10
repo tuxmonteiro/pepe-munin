@@ -3,8 +3,8 @@ munin:
 
 spring:
   datasource:
-    password: ${DB_USER:""}
     url: ${DB_URL:localhost}
     username: ${DB_USER:root}
     driver-class-name: org.postgresql.Driver
+    password: ${DB_PASSWORD:""}
 pepe_endpoint: ${PEPE_ENDPOINT:localhost:80000}

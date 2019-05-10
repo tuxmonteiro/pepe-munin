@@ -7,8 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class JsonNodeUtil {
 
     public static JsonNode buildJsonNode(){
-        JsonNode node = JsonNodeFactory.instance.objectNode();
-        ((ObjectNode) node).set("metric",null);
+        JsonNode node = ((ObjectNode) JsonNodeFactory.instance.objectNode());
         return node;
     }
 

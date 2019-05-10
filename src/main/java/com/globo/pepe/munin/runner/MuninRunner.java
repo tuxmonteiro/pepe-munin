@@ -1,7 +1,7 @@
 package com.globo.pepe.munin.runner;
 
-import com.globo.pepe.munin.repository.SofiaRepository;
 import com.globo.pepe.munin.service.MuninService;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -16,7 +16,8 @@ public class MuninRunner {
 
     @Scheduled(fixedDelayString = "${munin.fixedDelay}")
     public void run() {
-        muninService.send();
+       muninService.send();
     }
+
 
 }
