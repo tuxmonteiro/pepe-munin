@@ -2,6 +2,7 @@ package com.globo.pepe.munin.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.globo.pepe.munin.util.MuninConfiguration;
+import org.openstack4j.api.OSClient.OSClientV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
@@ -21,9 +22,8 @@ public class PepeApiService {
         this.restTemplate = getRestTemplate();
     }
 
-    public void sendMetrics(JsonNode metric){
+    public void sendMetrics(JsonNode metric, OSClientV3 osClientV3){
         HttpEntity<JsonNode> entity = new HttpEntity<>(metric);
-
         try {
             restTemplate.exchange(configuration.getPepeApiEndpoint(), HttpMethod.POST, entity, JsonNode.class);
         }
