@@ -21,7 +21,7 @@ public class MuninServiceTest {
         MuninService muninService = Mockito.mock(MuninService.class);
         SofiaRepository sofiaRepository = Mockito.mock(SofiaRepository.class);
         List<Map<String, Object>> metrics = new ArrayList<Map<String, Object>>();
-        Mockito.when(sofiaRepository.findByMetrics()).thenReturn(metrics);
+        Mockito.when(sofiaRepository.findByMetrics(null)).thenReturn(metrics);
         Mockito.when(muninService.getSofiaRepository()).thenReturn(sofiaRepository);
         muninService.send();
     }
@@ -43,7 +43,7 @@ public class MuninServiceTest {
             metrics.add(metric);
             metrics.add(metric);
 
-            Mockito.when(sofiaRepository.findByMetrics()).thenReturn(metrics);
+            Mockito.when(sofiaRepository.findByMetrics(null)).thenReturn(metrics);
             Mockito.when(muninService.getSofiaRepository()).thenReturn(sofiaRepository);
 
             Mockito.when(muninService.getPepeApiService()).thenReturn(pepeApiService);

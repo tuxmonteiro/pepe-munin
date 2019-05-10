@@ -1,5 +1,6 @@
 package com.globo.pepe.munin.repository;
 
+import com.globo.pepe.common.services.JsonLoggerService;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +13,21 @@ public class SofiaRepository {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    public  List<Map<String, Object>> findByMetrics() {
+    private final JsonLoggerService jsonLoggerService;
+
+    public SofiaRepository(JsonLoggerService jsonLoggerService) {
+        this.jsonLoggerService = jsonLoggerService;
+    }
+
+    public  List<Map<String, Object>> findByMetrics(String query) {
+        List<Map<String, Object>> result = null;
         try {
-            String query = "select * from entity limit 10";
-            List<Map<String, Object>> result = jdbcTemplate.queryForList(query);
-            return result;
+            result = jdbcTemplate.queryForList(query);
+
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
+            jsonLoggerService.newLogger(getClass()).put("short_message", e.getMessage() + ": " + result).sendError();
         }
+        return result;
     }
 
 }

@@ -27,9 +27,10 @@ public class MuninService {
 
 
     public void send(){
+
         OSClientV3 os = keystoneService.authenticate(configuration.getUser(),  configuration.getPassword(),  configuration.getIdentifier());
 
-        List<Map<String, Object>> metrics = getSofiaRepository().findByMetrics();
+        List<Map<String, Object>> metrics = getSofiaRepository().findByMetrics(configuration.getQueryWorker());
 
         if(metrics != null && !metrics.isEmpty()){
             for(Map<String, Object> metric : metrics){

@@ -8,11 +8,11 @@ spring:
     driver-class-name: org.postgresql.Driver
     password: ${DB_PASSWORD:""}
 pepe_endpoint: ${PEPE_ENDPOINT:localhost:80000}
-keystone_url: ${KEYSTONE_URL}
-keystone_domain: ${KEYSTONE_DOMAIN}
-keystone_project: ${KEYSTONE_PROJECT}
-pepe_security_disabled: ${PEPE_SECURITY_DISABLED}
-keystone_token: ${KEYSTONE_TOKEN}
-user_keystone: ${KEYSTONE_USER}
-password_keystone: ${KEYSTONE_PASSWORD}
-identifier_keystone: ${KEYSTONE_IDENTIFIER}
+keystone_url: ${KEYSTONE_URL:""}
+user_keystone: ${KEYSTONE_USER:""}
+password_keystone: ${KEYSTONE_PASSWORD:""}
+identifier_keystone: ${KEYSTONE_IDENTIFIER:""}
+munin_query_worker: ${MUNIN_QUERY_WORKER:""}
+pepe:
+  logging:
+    tags: default

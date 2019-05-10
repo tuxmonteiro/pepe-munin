@@ -1,6 +1,7 @@
 package com.globo.pepe.munin.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.munin.util.MuninConfiguration;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +16,14 @@ public class PepeApiService {
 
     RestTemplate restTemplate;
 
+    private final JsonLoggerService jsonLoggerService;
+
     @Autowired
     private MuninConfiguration configuration;
 
-    public PepeApiService() {
+    public PepeApiService(JsonLoggerService jsonLoggerService) {
         this.restTemplate = getRestTemplate();
+        this.jsonLoggerService = jsonLoggerService;
     }
 
     public void sendMetrics(JsonNode metric, OSClientV3 osClientV3){
@@ -28,7 +32,7 @@ public class PepeApiService {
             restTemplate.exchange(configuration.getPepeApiEndpoint(), HttpMethod.POST, entity, JsonNode.class);
         }
         catch (Exception e) {
-            System.out.println(e.getMessage());
+            jsonLoggerService.newLogger(getClass()).put("short_message", e.getMessage()).sendError();
         }
     }
 
