@@ -16,3 +16,4 @@ munin_query_worker: ${MUNIN_QUERY_WORKER:""}
 pepe:
   logging:
     tags: default
+munin_source: ${MUNIN_SOURCE:""}

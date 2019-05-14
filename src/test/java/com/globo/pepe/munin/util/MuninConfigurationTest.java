@@ -16,13 +16,14 @@ public class MuninConfigurationTest  {
     @Autowired
     private MuninConfiguration configuration;
 
-    @Test
-    public void contextLoads() {
-    }
 
     @Test
     public void  pepeApiEndPointNotNull(){
         assertThat(configuration.getPepeApiEndpoint(), Matchers.notNullValue());
     }
 
+    @Test
+    public void  keystoneEndPointNotNull(){
+        assertThat(configuration.getKeystoneEndPoint(), Matchers.notNullValue());
+    }
 }

@@ -28,7 +28,7 @@ public class MuninService {
 
     public void send(){
 
-        OSClientV3 os = keystoneService.authenticate(configuration.getUser(),  configuration.getPassword(),  configuration.getIdentifier());
+        OSClientV3 os = getKeystoneService().authenticate(configuration.getUser(),configuration.getPassword(),configuration.getIdentifier());
 
         List<Map<String, Object>> metrics = getSofiaRepository().findByMetrics(configuration.getQueryWorker());
 
@@ -48,4 +48,9 @@ public class MuninService {
     public PepeApiService getPepeApiService() {
         return pepeApiService;
     }
+
+    public KeystoneService getKeystoneService() {
+        return keystoneService;
+    }
+
 }

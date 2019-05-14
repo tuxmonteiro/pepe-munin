@@ -7,18 +7,20 @@ import org.springframework.stereotype.Component;
 public class MuninConfiguration {
 
     private @Value("${pepe_endpoint}") String pepeApiEndpoint;
-    private @Value("${keystone_url}") String keystoneUrl;
+    private @Value("${keystone_url}") String keystoneEndPoint;
     private @Value("${user_keystone}") String user;
     private @Value("${password_keystone}") String password;
     private @Value("${identifier_keystone}") String identifier;
     private  @Value("${munin_query_worker}") String queryWorker;
+    private @Value("${munin_source}") String source;
+
 
     public String getPepeApiEndpoint() {
         return pepeApiEndpoint;
     }
 
-    public String getKeystoneUrl() {
-        return keystoneUrl;
+    public String getKeystoneEndPoint() {
+        return keystoneEndPoint;
     }
 
     public String getUser() {
@@ -35,5 +37,9 @@ public class MuninConfiguration {
 
     public String getQueryWorker() {
         return queryWorker;
+    }
+
+    public String getSource() {
+        return source;
     }
 }

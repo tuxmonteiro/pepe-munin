@@ -23,12 +23,12 @@ public class KeystoneService {
     public OSClientV3 authenticate(String user, String Password, String identifier){
         OSClientV3 os = null;
         try {
-             os = OSFactory.builderV3().endpoint(configuration.getKeystoneUrl())
+             os = OSFactory.builderV3().endpoint(configuration.getKeystoneEndPoint())
                 .credentials(user, Password,Identifier.byId(identifier)).authenticate();
         }catch (Exception e){
             jsonLoggerService.newLogger(getClass()).put("short_message", e.getMessage()+ ":"+ os).sendError();
         }
         return os;
-
     }
+
 }
