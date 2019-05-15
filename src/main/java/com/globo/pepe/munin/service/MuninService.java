@@ -26,31 +26,19 @@ public class MuninService {
     private MuninConfiguration configuration;
 
 
+
     public void send(){
+        OSClientV3 os = keystoneService.authenticate(configuration.getUser(),configuration.getPassword(),configuration.getIdentifier());
 
-        OSClientV3 os = getKeystoneService().authenticate(configuration.getUser(),configuration.getPassword(),configuration.getIdentifier());
-
-        List<Map<String, Object>> metrics = getSofiaRepository().findByMetrics(configuration.getQueryWorker());
+        List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(configuration.getQueryWorker());
 
         if(metrics != null && !metrics.isEmpty()){
             for(Map<String, Object> metric : metrics){
                         ObjectMapper mapper = new ObjectMapper();
                         JsonNode jsonNode = mapper.valueToTree(metric);
-                        getPepeApiService().sendMetrics(jsonNode,os);
+                pepeApiService.sendMetrics(jsonNode,os);
             }
         }
-    }
-
-    public SofiaRepository getSofiaRepository() {
-        return sofiaRepository;
-    }
-
-    public PepeApiService getPepeApiService() {
-        return pepeApiService;
-    }
-
-    public KeystoneService getKeystoneService() {
-        return keystoneService;
     }
 
 }
