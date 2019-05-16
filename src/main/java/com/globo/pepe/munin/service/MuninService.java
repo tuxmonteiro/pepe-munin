@@ -32,9 +32,9 @@ public class MuninService {
 
         final List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
 
-        for(Map<String, Object> metric : metrics){
-                    ObjectMapper mapper = new ObjectMapper();
-                    JsonNode jsonNode = mapper.valueToTree(metric);
+        for(Map<String, Object> metric : metrics) {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.valueToTree(metric);
             pepeApiService.sendMetrics(jsonNode,os);
         }
 
