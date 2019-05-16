@@ -1,8 +1,8 @@
 package com.globo.pepe.munin.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.globo.pepe.munin.util.JsonNodeUtil;
 import com.globo.pepe.munin.util.KeystoneMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +19,9 @@ public class PepeApiServiceTest  {
 
     @Autowired
     private PepeApiService pepeApiService;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @Before
     public void setUp(){
@@ -50,13 +53,13 @@ public class PepeApiServiceTest  {
     }
 
     private JsonNode getMetricMock() {
-        JsonNode metric = JsonNodeUtil.buildJsonNode();
-        ((ObjectNode) metric).put("time", "1844055562000");
-        ((ObjectNode) metric).put("vip_id", "00000e00-ea0c-000e-b0ac-0000f0000000");
-        ((ObjectNode) metric).put("vip_name", "domain.com");
-        ((ObjectNode) metric).put("vm_name", "vm-name");
-        ((ObjectNode) metric).put("vm_id", "00000e00-ea0c-000e-b0ac-0000f0000000");
-        ((ObjectNode) metric).put("  vm_project ", "project");
+        ObjectNode metric = mapper.createObjectNode();
+        metric.put("time", "1844055562000");
+        metric.put("vip_id", "00000e00-ea0c-000e-b0ac-0000f0000000");
+        metric.put("vip_name", "domain.com");
+        metric.put("vm_name", "vm-name");
+        metric.put("vm_id", "00000e00-ea0c-000e-b0ac-0000f0000000");
+        metric.put("  vm_project ", "project");
         return metric;
     }
 

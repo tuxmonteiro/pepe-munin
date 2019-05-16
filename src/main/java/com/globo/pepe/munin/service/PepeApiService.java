@@ -1,9 +1,9 @@
 package com.globo.pepe.munin.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.globo.pepe.common.services.JsonLoggerService;
-import com.globo.pepe.munin.util.JsonNodeUtil;
 import java.util.Calendar;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +25,10 @@ public class PepeApiService {
 
     private final RestTemplate restTemplate;
     private final JsonLoggerService jsonLoggerService;
+    private final ObjectMapper mapper;
 
-    public PepeApiService(JsonLoggerService jsonLoggerService) {
+    public PepeApiService(JsonLoggerService jsonLoggerService, ObjectMapper mapper) {
+        this.mapper = mapper;
         this.restTemplate = new RestTemplate();
         this.jsonLoggerService = jsonLoggerService;
     }
@@ -49,17 +51,17 @@ public class PepeApiService {
 
     public JsonNode buildEntity(JsonNode metric, OSClientV3 osClientV3) {
         String keytoreProjectName = osClientV3.getToken().getProject().getName();
-        JsonNode requestBody = JsonNodeUtil.buildJsonNode();
-        JsonNode metaData = JsonNodeUtil.buildJsonNode();
-        ((ObjectNode) metaData).put("id", Calendar.getInstance().getTimeInMillis());
-        ((ObjectNode) metaData).put("source", source);
-        ((ObjectNode) metaData).put("project", keytoreProjectName);
-        ((ObjectNode) metaData).put("token", osClientV3.getToken().getId());
-        ((ObjectNode) metaData).put("timestamp", Calendar.getInstance().getTimeInMillis() * 1000L * 1000L);
-        ((ObjectNode) metaData).put("trigger_name", keytoreProjectName.concat("acs-collector"));
-        ((ObjectNode) requestBody).set("payload", metric);
-        ((ObjectNode) requestBody).set("metadata", metaData);
-        ((ObjectNode) requestBody).put("id", "xxxx"+Calendar.getInstance().getTimeInMillis());
+        ObjectNode requestBody = mapper.createObjectNode();
+        ObjectNode metaData = mapper.createObjectNode();
+        metaData.put("id", Calendar.getInstance().getTimeInMillis());
+        metaData.put("source", source);
+        metaData.put("project", keytoreProjectName);
+        metaData.put("token", osClientV3.getToken().getId());
+        metaData.put("timestamp", Calendar.getInstance().getTimeInMillis() * 1000L * 1000L);
+        metaData.put("trigger_name", keytoreProjectName.concat("acs-collector"));
+        requestBody.set("payload", metric);
+        requestBody.set("metadata", metaData);
+        requestBody.put("id", "xxxx"+Calendar.getInstance().getTimeInMillis());
         return requestBody;
     }
 
