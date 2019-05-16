@@ -1,19 +1,21 @@
-munin:
-  fixedDelay: ${SCHEDULER_TIME:30000}
-
 spring:
   datasource:
-    url: ${DB_URL:localhost}
-    username: ${DB_USER:root}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/pepe}
     driver-class-name: org.postgresql.Driver
+    username: ${DB_USER:root}
     password: ${DB_PASSWORD:""}
-pepe_endpoint: ${PEPE_ENDPOINT:localhost:80000}
-keystone_url: ${KEYSTONE_URL:""}
-user_keystone: ${KEYSTONE_USER:""}
-password_keystone: ${KEYSTONE_PASSWORD:""}
-identifier_keystone: ${KEYSTONE_IDENTIFIER:""}
-munin_query_worker: ${MUNIN_QUERY_WORKER:""}
+
 pepe:
   logging:
     tags: default
-munin_source: ${MUNIN_SOURCE:""}
+  api:
+    endpoint: ${PEPE_ENDPOINT:http://localhost:8000}
+  keystone:
+    url: ${KEYSTONE_URL:""}
+    user: ${KEYSTONE_USER:""}
+    password: ${KEYSTONE_PASSWORD:""}
+    identifier: ${KEYSTONE_IDENTIFIER:""}
+  munin:
+    query: ${MUNIN_QUERY_WORKER:""}
+    source: ${MUNIN_SOURCE:""}
+    fixedDelay: ${SCHEDULER_TIME:30000}

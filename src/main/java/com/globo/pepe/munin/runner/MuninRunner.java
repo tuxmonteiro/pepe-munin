@@ -10,13 +10,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 public class MuninRunner {
 
-    @Autowired
-    private MuninService muninService;
+    private final MuninService muninService;
 
-    @Scheduled(fixedDelayString = "${munin.fixedDelay}")
+    @Scheduled(fixedDelayString = "${pepe.munin.fixedDelay}")
     public void run() {
        muninService.send();
     }
 
-
+    public MuninRunner(MuninService muninService) {
+        this.muninService = muninService;
+    }
 }

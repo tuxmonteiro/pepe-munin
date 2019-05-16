@@ -7,17 +7,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -35,8 +32,8 @@ public class MuninServiceTest {
 
     @Before
     public void initMocks(){
-        List<Map<String, Object>> metrics = new ArrayList<Map<String, Object>>();
-        Map<String,Object> metricValue = new LinkedHashMap();
+        List<Map<String, Object>> metrics = new ArrayList<>();
+        Map<String,Object> metricValue = new LinkedHashMap<>();
         metricValue.put("cpu","00");
         metricValue.put("ram","00");
         metricValue.put("so","linux");
@@ -44,7 +41,7 @@ public class MuninServiceTest {
 
         Mockito.when(this.sofiaRepository.findByMetrics(Mockito.anyString())).thenReturn(metrics);
         OSClientV3 osClientV3 = KeystoneMock.getOSClientV3();
-        Mockito.when(keystoneService.authenticate(Mockito.anyString(),Mockito.anyString(),Mockito.anyString())).thenReturn(osClientV3);
+        Mockito.when(keystoneService.authenticate()).thenReturn(osClientV3);
         MockitoAnnotations.initMocks(this);
     }
 

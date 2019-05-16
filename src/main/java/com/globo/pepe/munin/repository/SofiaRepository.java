@@ -10,13 +10,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class SofiaRepository {
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
+    private final JdbcTemplate jdbcTemplate;
     private final JsonLoggerService jsonLoggerService;
 
-    public SofiaRepository(JsonLoggerService jsonLoggerService) {
+    public SofiaRepository(JsonLoggerService jsonLoggerService, JdbcTemplate jdbcTemplate) {
         this.jsonLoggerService = jsonLoggerService;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public  List<Map<String, Object>> findByMetrics(String query) {
@@ -25,7 +24,7 @@ public class SofiaRepository {
             result = jdbcTemplate.queryForList(query);
 
         } catch (Exception e) {
-            jsonLoggerService.newLogger(getClass()).put("short_message", e.getMessage() + ": " + result).sendError();
+            jsonLoggerService.newLogger(getClass()).put("short_message", e.getMessage()).sendError();
         }
         return result;
     }
