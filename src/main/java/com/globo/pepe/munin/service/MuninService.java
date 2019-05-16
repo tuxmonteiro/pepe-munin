@@ -30,7 +30,7 @@ public class MuninService {
         this.mapper = mapper;
     }
 
-    public void send(){
+    public void send() throws Exception {
         OSClientV3 os = keystoneService.authenticate();
 
         final List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);

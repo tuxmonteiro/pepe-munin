@@ -1,7 +1,7 @@
 package com.globo.pepe.munin.runner;
 
+import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.munin.service.MuninService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,13 +11,19 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class MuninRunner {
 
     private final MuninService muninService;
+    private final JsonLoggerService jsonLoggerService;
+
+    public MuninRunner(MuninService muninService, JsonLoggerService jsonLoggerService) {
+        this.muninService = muninService;
+        this.jsonLoggerService = jsonLoggerService;
+    }
 
     @Scheduled(fixedDelayString = "${pepe.munin.fixedDelay}")
     public void run() {
-       muninService.send();
-    }
-
-    public MuninRunner(MuninService muninService) {
-        this.muninService = muninService;
+        try {
+            muninService.send();
+        } catch (Exception e){
+            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError();
+        }
     }
 }

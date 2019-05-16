@@ -28,15 +28,9 @@ public class KeystoneService {
         this.jsonLoggerService = jsonLoggerService;
     }
 
-    public OSClientV3 authenticate(){
-        OSClientV3 os = null;
-        try {
-             os = OSFactory.builderV3().endpoint(keystoneEndPoint)
+    public OSClientV3 authenticate() throws Exception {
+         return OSFactory.builderV3().endpoint(keystoneEndPoint)
                 .credentials(user, password,Identifier.byId(identifier)).authenticate();
-        }catch (Exception e){
-            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError();
-        }
-        return os;
     }
 
 }
