@@ -48,7 +48,7 @@ public class PepeApiService {
             restTemplate.exchange(pepeApiEndpoint, HttpMethod.POST, entity, String.class);
         }
         catch (Exception e) {
-            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError();
+            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
         }
     }
 

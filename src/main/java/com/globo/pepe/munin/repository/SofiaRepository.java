@@ -22,7 +22,7 @@ public class SofiaRepository {
         try {
             return jdbcTemplate.queryForList(query);
         } catch (Exception e) {
-            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError();
+            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
         }
         return Collections.emptyList();
     }

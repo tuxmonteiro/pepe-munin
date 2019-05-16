@@ -7,6 +7,8 @@ import com.globo.pepe.munin.repository.SofiaRepository;
 import java.util.List;
 import java.util.Map;
 import org.openstack4j.api.OSClient.OSClientV3;
+import org.openstack4j.model.identity.v3.Project;
+import org.openstack4j.model.identity.v3.Token;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -40,8 +42,10 @@ public class MuninService {
     public void send() {
         try {
             OSClientV3 os = keystoneService.authenticate();
-            String project = os.getToken().getProject().getName();
-            String tokenId = os.getToken().getId();
+            Token token = os.getToken();
+            Project tokenProject = token.getProject();
+            String project = tokenProject.getName();
+            String tokenId = token.getId();
 
             final List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
 
@@ -50,7 +54,7 @@ public class MuninService {
                 pepeApiService.sendMetrics(jsonNode, project, tokenId);
             }
         } catch (Exception e){
-            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError();
+            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
         }
     }
 
