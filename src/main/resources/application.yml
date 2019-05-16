@@ -16,12 +16,12 @@ pepe:
   api:
     endpoint: ${PEPE_ENDPOINT:http://127.0.0.1:8000}
   keystone:
-    url: ${KEYSTONE_URL:""}
-    user: ${KEYSTONE_USER:""}
-    password: ${KEYSTONE_PASSWORD:""}
-    identifier: ${KEYSTONE_IDENTIFIER:""}
+    url: ${KEYSTONE_URL:http://127.0.0.1:5000/v3}
+    user: ${KEYSTONE_USER:user}
+    password: ${KEYSTONE_PASSWORD:password}
+    identifier: ${KEYSTONE_IDENTIFIER:default}
   munin:
-    query: ${MUNIN_QUERY_WORKER:""}
-    source: ${MUNIN_SOURCE:""}
+    query: ${MUNIN_QUERY_WORKER:SELECT 1}
+    source: ${MUNIN_SOURCE:munin}
     fixedDelay: ${SCHEDULER_TIME:30000}
     trigger_name: ${MUNIN_TRIGGER:acs-collector}
