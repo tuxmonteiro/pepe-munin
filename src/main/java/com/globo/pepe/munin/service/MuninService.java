@@ -32,12 +32,14 @@ public class MuninService {
 
     public void send() throws Exception {
         OSClientV3 os = keystoneService.authenticate();
+        String project = os.getToken().getProject().getName();
+        String tokenId = os.getToken().getId();
 
         final List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
 
         for(Map<String, Object> metric : metrics) {
             JsonNode jsonNode = mapper.valueToTree(metric);
-            pepeApiService.sendMetrics(jsonNode,os);
+            pepeApiService.sendMetrics(jsonNode, project, tokenId);
         }
 
     }

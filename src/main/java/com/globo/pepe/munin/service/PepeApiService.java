@@ -1,11 +1,12 @@
 package com.globo.pepe.munin.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.globo.pepe.common.model.Event;
+import com.globo.pepe.common.model.Metadata;
 import com.globo.pepe.common.services.JsonLoggerService;
 import java.util.Calendar;
-import org.openstack4j.api.OSClient.OSClientV3;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,15 +34,14 @@ public class PepeApiService {
         this.jsonLoggerService = jsonLoggerService;
     }
 
-    public void sendMetrics(JsonNode metric, OSClientV3 osClientV3){
+    public void sendMetrics(JsonNode metric, String project, String tokenId){
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        JsonNode obj =  buildEntity(metric,osClientV3);
-        HttpEntity<String> entity = new HttpEntity<>(obj.toString(),headers);
-
         try {
+            String obj =  buildEntity(metric, project, tokenId);
+            HttpEntity<String> entity = new HttpEntity<>(obj, headers);
             restTemplate.exchange(pepeApiEndpoint, HttpMethod.POST, entity, String.class);
         }
         catch (Exception e) {
@@ -49,20 +49,20 @@ public class PepeApiService {
         }
     }
 
-    public JsonNode buildEntity(JsonNode metric, OSClientV3 osClientV3) {
-        String keytoreProjectName = osClientV3.getToken().getProject().getName();
-        ObjectNode requestBody = mapper.createObjectNode();
-        ObjectNode metaData = mapper.createObjectNode();
-        metaData.put("id", Calendar.getInstance().getTimeInMillis());
-        metaData.put("source", source);
-        metaData.put("project", keytoreProjectName);
-        metaData.put("token", osClientV3.getToken().getId());
-        metaData.put("timestamp", Calendar.getInstance().getTimeInMillis() * 1000L * 1000L);
-        metaData.put("trigger_name", keytoreProjectName.concat("acs-collector"));
-        requestBody.set("payload", metric);
-        requestBody.set("metadata", metaData);
-        requestBody.put("id", "xxxx"+Calendar.getInstance().getTimeInMillis());
-        return requestBody;
+    public String buildEntity(JsonNode metric, String project, String tokenId) throws JsonProcessingException {
+        final Event event = new Event();
+        event.setId(Long.toString(Calendar.getInstance().getTimeInMillis()));
+
+        Metadata metadata = new Metadata();
+        metadata.setSource(source);
+        metadata.setProject(project);
+        metadata.setToken(tokenId);
+        metadata.setTimestamp(Calendar.getInstance().getTimeInMillis());
+        metadata.setTriggerName(project + "-acs-collector");
+        event.setMetadata(metadata);
+        event.setPayload(metric);
+
+        return mapper.writeValueAsString(event);
     }
 
 }

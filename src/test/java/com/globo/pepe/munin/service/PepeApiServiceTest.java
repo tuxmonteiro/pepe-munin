@@ -1,14 +1,13 @@
 package com.globo.pepe.munin.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.globo.pepe.munin.util.KeystoneMock;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.openstack4j.api.OSClient.OSClientV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -31,25 +30,20 @@ public class PepeApiServiceTest  {
     public void contextLoads() {
     }
 
-    @Test(expected = NullPointerException.class)
-    public void sendMetricsWithoutParametersNull(){
-        pepeApiService.sendMetrics(null,null);
-    }
-
     @Test
-    public void buildRequest(){
-        OSClientV3 osClientV3 = Mockito.mock(OSClientV3.class);
-        Mockito.when(osClientV3.getToken()).thenReturn(KeystoneMock.getToken());
+    public void buildRequest() throws JsonProcessingException {
+        String project = UUID.randomUUID().toString();
+        String tokenId = UUID.randomUUID().toString();
         JsonNode metric = getMetricMock();
-        pepeApiService.buildEntity(metric,osClientV3);
+        pepeApiService.buildEntity(metric, project, tokenId);
     }
 
     @Test
     public void sendMetrics(){
-        OSClientV3 osClientV3 = Mockito.mock(OSClientV3.class);
-        Mockito.when(osClientV3.getToken()).thenReturn(KeystoneMock.getToken());
+        String project = UUID.randomUUID().toString();
+        String tokenId = UUID.randomUUID().toString();
         JsonNode metric = getMetricMock();
-        pepeApiService.sendMetrics(metric,osClientV3);
+        pepeApiService.sendMetrics(metric, project, tokenId);
     }
 
     private JsonNode getMetricMock() {

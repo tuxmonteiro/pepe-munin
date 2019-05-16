@@ -31,7 +31,7 @@ public class MuninServiceTest {
     private KeystoneService keystoneService;
 
     @Before
-    public void initMocks(){
+    public void initMocks() throws Exception {
         List<Map<String, Object>> metrics = new ArrayList<>();
         Map<String,Object> metricValue = new LinkedHashMap<>();
         metricValue.put("cpu","00");
@@ -46,7 +46,7 @@ public class MuninServiceTest {
     }
 
     @Test
-    public void  sendMetrics(){
+    public void sendMetrics() throws Exception {
         muninService.send();
     }
 
