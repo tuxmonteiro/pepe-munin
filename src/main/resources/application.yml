@@ -1,15 +1,20 @@
+build:
+  project: '@project.artifactId@'
+  timestamp: '@timestamp@'
+  version: '@project.version@'
+
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/pepe}
+    url: ${DB_URL:jdbc:postgresql://127.0.0.1:5432/pepe}
     driver-class-name: org.postgresql.Driver
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:""}
 
 pepe:
   logging:
-    tags: default
+    tags: ${LOGGING_TAGS:default}
   api:
-    endpoint: ${PEPE_ENDPOINT:http://localhost:8000}
+    endpoint: ${PEPE_ENDPOINT:http://127.0.0.1:8000}
   keystone:
     url: ${KEYSTONE_URL:""}
     user: ${KEYSTONE_USER:""}
