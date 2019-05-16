@@ -34,14 +34,14 @@ public class PepeApiService {
         this.jsonLoggerService = jsonLoggerService;
     }
 
-    public void sendMetrics(JsonNode metric, String project, String tokenId){
+    void sendMetrics(JsonNode metric, String project, String tokenId){
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         try {
-            String obj =  buildEntity(metric, project, tokenId);
-            HttpEntity<String> entity = new HttpEntity<>(obj, headers);
+            String eventStr = buildEntity(metric, project, tokenId);
+            HttpEntity<String> entity = new HttpEntity<>(eventStr, headers);
             restTemplate.exchange(pepeApiEndpoint, HttpMethod.POST, entity, String.class);
         }
         catch (Exception e) {
@@ -49,16 +49,16 @@ public class PepeApiService {
         }
     }
 
-    public String buildEntity(JsonNode metric, String project, String tokenId) throws JsonProcessingException {
-        final Event event = new Event();
-        event.setId(Long.toString(Calendar.getInstance().getTimeInMillis()));
-
+    String buildEntity(JsonNode metric, String project, String tokenId) throws JsonProcessingException {
         Metadata metadata = new Metadata();
         metadata.setSource(source);
         metadata.setProject(project);
         metadata.setToken(tokenId);
         metadata.setTimestamp(Calendar.getInstance().getTimeInMillis());
         metadata.setTriggerName(project + "-acs-collector");
+
+        final Event event = new Event();
+        event.setId(Long.toString(Calendar.getInstance().getTimeInMillis()));
         event.setMetadata(metadata);
         event.setPayload(metric);
 
