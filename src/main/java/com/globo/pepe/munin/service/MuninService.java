@@ -30,15 +30,14 @@ public class MuninService {
     public void send(){
         OSClientV3 os = keystoneService.authenticate();
 
-        List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
+        final List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
 
-        if(!metrics.isEmpty()){
-            for(Map<String, Object> metric : metrics){
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode jsonNode = mapper.valueToTree(metric);
-                pepeApiService.sendMetrics(jsonNode,os);
-            }
+        for(Map<String, Object> metric : metrics){
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode jsonNode = mapper.valueToTree(metric);
+            pepeApiService.sendMetrics(jsonNode,os);
         }
+
     }
 
 }
