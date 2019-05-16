@@ -46,12 +46,6 @@ public class MuninServiceTest {
     }
 
     @Test
-    public void  sendWithoutMetrics(){
-        Mockito.when(sofiaRepository.findByMetrics(null)).thenReturn(null);
-        muninService.send();
-    }
-
-    @Test
     public void  sendMetrics(){
         muninService.send();
     }

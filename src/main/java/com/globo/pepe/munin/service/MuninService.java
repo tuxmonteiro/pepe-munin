@@ -32,7 +32,7 @@ public class MuninService {
 
         List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
 
-        if(metrics != null && !metrics.isEmpty()){
+        if(!metrics.isEmpty()){
             for(Map<String, Object> metric : metrics){
                         ObjectMapper mapper = new ObjectMapper();
                         JsonNode jsonNode = mapper.valueToTree(metric);
