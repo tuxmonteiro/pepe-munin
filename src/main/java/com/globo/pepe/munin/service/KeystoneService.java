@@ -1,6 +1,7 @@
 package com.globo.pepe.munin.service;
 
 import org.openstack4j.api.OSClient.OSClientV3;
+import org.openstack4j.api.exceptions.AuthenticationException;
 import org.openstack4j.model.common.Identifier;
 import org.openstack4j.openstack.OSFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +23,12 @@ public class KeystoneService {
     private String identifier;
 
     public OSClientV3 authenticate() throws Exception {
-         return OSFactory.builderV3().endpoint(keystoneEndPoint)
-                .credentials(user, password,Identifier.byId(identifier)).authenticate();
+        OSClientV3 client = OSFactory.builderV3().endpoint(keystoneEndPoint)
+            .credentials(user, password, Identifier.byId(identifier)).authenticate();
+        if (client == null) {
+            throw new AuthenticationException("client is null", 401);
+        }
+        return client;
     }
 
 }
