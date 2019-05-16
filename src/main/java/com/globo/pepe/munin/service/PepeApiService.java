@@ -6,6 +6,7 @@ import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.munin.util.JsonNodeUtil;
 import java.util.Calendar;
 import org.openstack4j.api.OSClient.OSClientV3;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
