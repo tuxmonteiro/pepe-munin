@@ -18,13 +18,16 @@ public class MuninService {
     private final SofiaRepository sofiaRepository;
     private final PepeApiService pepeApiService;
     private final KeystoneService keystoneService;
+    private final ObjectMapper mapper;
 
     public MuninService(SofiaRepository sofiaRepository,
             PepeApiService pepeApiService,
-            KeystoneService keystoneService) {
+            KeystoneService keystoneService,
+            ObjectMapper mapper) {
         this.sofiaRepository = sofiaRepository;
         this.pepeApiService = pepeApiService;
         this.keystoneService = keystoneService;
+        this.mapper = mapper;
     }
 
     public void send(){
@@ -33,7 +36,6 @@ public class MuninService {
         final List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
 
         for(Map<String, Object> metric : metrics) {
-            ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.valueToTree(metric);
             pepeApiService.sendMetrics(jsonNode,os);
         }
