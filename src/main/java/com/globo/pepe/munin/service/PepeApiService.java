@@ -24,6 +24,9 @@ public class PepeApiService {
     @Value("${pepe.munin.source}")
     private String source;
 
+    @Value("${pepe.munin.trigger_name}")
+    private String triggerName;
+
     private final RestTemplate restTemplate;
     private final JsonLoggerService jsonLoggerService;
     private final ObjectMapper mapper;
@@ -55,7 +58,7 @@ public class PepeApiService {
         metadata.setProject(project);
         metadata.setToken(tokenId);
         metadata.setTimestamp(Calendar.getInstance().getTimeInMillis());
-        metadata.setTriggerName(project + "-acs-collector");
+        metadata.setTriggerName(triggerName);
 
         final Event event = new Event();
         event.setId(Long.toString(Calendar.getInstance().getTimeInMillis()));

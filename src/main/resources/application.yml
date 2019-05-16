@@ -19,3 +19,4 @@ pepe:
     query: ${MUNIN_QUERY_WORKER:""}
     source: ${MUNIN_SOURCE:""}
     fixedDelay: ${SCHEDULER_TIME:30000}
+    trigger_name: ${MUNIN_TRIGGER:acs-collector}

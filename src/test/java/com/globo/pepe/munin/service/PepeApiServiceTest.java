@@ -53,7 +53,7 @@ public class PepeApiServiceTest  {
         metric.put("vip_name", "domain.com");
         metric.put("vm_name", "vm-name");
         metric.put("vm_id", "00000e00-ea0c-000e-b0ac-0000f0000000");
-        metric.put("  vm_project ", "project");
+        metric.put("vm_project ", "project");
         return metric;
     }
 

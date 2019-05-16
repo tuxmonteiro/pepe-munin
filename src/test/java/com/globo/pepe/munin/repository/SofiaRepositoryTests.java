@@ -24,7 +24,7 @@ public class SofiaRepositoryTests {
     @Test
     public void findByMetricsTest() {
         List<Map<String, Object>> metrics = new ArrayList<>();
-        LinkedHashMap<String,Object> metricValue = new LinkedHashMap();
+        Map<String,Object> metricValue = new LinkedHashMap<>();
         metricValue.put("cpu","00");
         metricValue.put("ram","00");
         metricValue.put("so","linux");
