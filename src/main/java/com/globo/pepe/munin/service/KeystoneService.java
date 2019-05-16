@@ -34,7 +34,7 @@ public class KeystoneService {
              os = OSFactory.builderV3().endpoint(keystoneEndPoint)
                 .credentials(user, password,Identifier.byId(identifier)).authenticate();
         }catch (Exception e){
-            jsonLoggerService.newLogger(getClass()).put("short_message", e.getMessage()).sendError();
+            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError();
         }
         return os;
     }
