@@ -1,6 +1,5 @@
 package com.globo.pepe.munin.service;
 
-import com.globo.pepe.common.services.JsonLoggerService;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.common.Identifier;
 import org.openstack4j.openstack.OSFactory;
@@ -21,12 +20,6 @@ public class KeystoneService {
 
     @Value("${pepe.keystone.identifier}")
     private String identifier;
-
-    private final JsonLoggerService jsonLoggerService;
-
-    public KeystoneService(JsonLoggerService jsonLoggerService) {
-        this.jsonLoggerService = jsonLoggerService;
-    }
 
     public OSClientV3 authenticate() throws Exception {
          return OSFactory.builderV3().endpoint(keystoneEndPoint)
