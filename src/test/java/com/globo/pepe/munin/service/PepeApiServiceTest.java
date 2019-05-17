@@ -1,6 +1,5 @@
 package com.globo.pepe.munin.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -31,11 +30,12 @@ public class PepeApiServiceTest  {
     }
 
     @Test
-    public void buildRequest() throws JsonProcessingException {
+    public void buildRequest() {
         String project = UUID.randomUUID().toString();
         String tokenId = UUID.randomUUID().toString();
         JsonNode metric = getMetricMock();
-        pepeApiService.buildEntity(metric, project, tokenId);
+        final JsonNode eventJson = pepeApiService.buildEntity(metric, project, tokenId);
+        //TODO: test eventJson
     }
 
     @Test
@@ -44,6 +44,7 @@ public class PepeApiServiceTest  {
         String tokenId = UUID.randomUUID().toString();
         JsonNode metric = getMetricMock();
         pepeApiService.sendMetrics(metric, project, tokenId);
+        //TODO: MockServer response from restTemplate.exchange()
     }
 
     private JsonNode getMetricMock() {
