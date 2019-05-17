@@ -1,6 +1,5 @@
 package com.globo.pepe.munin.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.model.Event;
@@ -43,16 +42,16 @@ public class PepeApiService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         try {
-            String eventStr = buildEntity(metric, project, tokenId);
-            HttpEntity<String> entity = new HttpEntity<>(eventStr, headers);
-            restTemplate.exchange(pepeApiEndpoint, HttpMethod.POST, entity, String.class);
+            JsonNode event = buildEntity(metric, project, tokenId);
+            HttpEntity<JsonNode> request = new HttpEntity<>(event, headers);
+            restTemplate.exchange(pepeApiEndpoint, HttpMethod.POST, request, JsonNode.class);
         }
         catch (Exception e) {
             jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
         }
     }
 
-    String buildEntity(JsonNode metric, String project, String tokenId) throws JsonProcessingException {
+    JsonNode buildEntity(JsonNode metric, String project, String tokenId) {
         Metadata metadata = new Metadata();
         metadata.setSource(source);
         metadata.setProject(project);
@@ -65,7 +64,7 @@ public class PepeApiService {
         event.setMetadata(metadata);
         event.setPayload(metric);
 
-        return mapper.writeValueAsString(event);
+        return mapper.valueToTree(event);
     }
 
 }
