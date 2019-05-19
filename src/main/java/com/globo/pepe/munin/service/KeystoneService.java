@@ -19,12 +19,18 @@ public class KeystoneService {
     @Value("${pepe.keystone.password}")
     private String password;
 
-    @Value("${pepe.keystone.identifier}")
-    private String identifier;
+    @Value("${pepe.keystone.domain}")
+    private String domain;
+
+    @Value("${pepe.keystone.project}")
+    private String project;
 
     public OSClientV3 authenticate() throws Exception {
-        OSClientV3 client = OSFactory.builderV3().endpoint(keystoneEndPoint)
-            .credentials(user, password, Identifier.byId(identifier)).authenticate();
+        OSClientV3 client = OSFactory.builderV3()
+                .endpoint(keystoneEndPoint)
+                .credentials(user, password, null)
+                .scopeToProject(Identifier.byName(project), Identifier.byId(domain))
+                .authenticate();
         if (client == null) {
             throw new AuthenticationException("client is null", 401);
         }

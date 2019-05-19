@@ -70,27 +70,6 @@ public class MuninServiceTest {
 
     }
 
-    private static String requestBodyWithToken(String token) {
-        return "{\n"
-            + "  \"auth\" : {\n"
-            + "    \"identity\" : {\n"
-            + "      \"token\" : {\n"
-            + "        \"id\" : \"" + token + "\"\n"
-            + "      },\n"
-            + "      \"methods\" : [ \"token\" ]\n"
-            + "    },\n"
-            + "    \"scope\" : {\n"
-            + "      \"project\" : {\n"
-            + "        \"name\" : \"admin\",\n"
-            + "        \"domain\" : {\n"
-            + "          \"name\" : \"default\"\n"
-            + "        }\n"
-            + "      }\n"
-            + "    }\n"
-            + "  }\n"
-            + "}";
-    }
-
     private static String requestBodyWithUserPassword(String user, String password) {
         return "{\n"
             + "  \"auth\" : {\n"
@@ -98,13 +77,18 @@ public class MuninServiceTest {
             + "      \"password\" : {\n"
             + "        \"user\" : {\n"
             + "          \"name\" : \"" + user + "\",\n"
-            + "          \"domain\" : {\n"
-            + "            \"id\" : \"default\"\n"
-            + "          },\n"
             + "          \"password\" : \"" + password + "\"\n"
             + "        }\n"
             + "      },\n"
             + "      \"methods\" : [ \"password\" ]\n"
+            + "    },\n"
+            + "    \"scope\" : {\n"
+            + "      \"project\" : {\n"
+            + "        \"name\" : \"admin\",\n"
+            + "        \"domain\" : {\n"
+            + "          \"id\" : \"default\"\n"
+            + "        }\n"
+            + "      }\n"
             + "    }\n"
             + "  }\n"
             + "}";
