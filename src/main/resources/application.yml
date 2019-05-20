@@ -19,7 +19,8 @@ pepe:
     url: ${KEYSTONE_URL:http://127.0.0.1:5000/v3}
     user: ${KEYSTONE_USER:user}
     password: ${KEYSTONE_PASSWORD:password}
-    identifier: ${KEYSTONE_IDENTIFIER:default}
+    domain: ${KEYSTONE_DOMAIN:default}
+    project: ${KEYSTONE_PROJECT:pepe}
   munin:
     query: ${MUNIN_QUERY_WORKER:SELECT 1}
     source: ${MUNIN_SOURCE:munin}

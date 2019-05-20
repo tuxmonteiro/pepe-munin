@@ -12,7 +12,8 @@ import org.springframework.test.context.junit4.SpringRunner;
     "pepe.keystone.url=default",
     "pepe.keystone.user=root",
     "pepe.keystone.password=",
-    "pepe.keystone.identifier=default"
+    "pepe.keystone.domain=default",
+    "pepe.keystone.project=pepe"
 })
 public class ApplicationTests {
 
