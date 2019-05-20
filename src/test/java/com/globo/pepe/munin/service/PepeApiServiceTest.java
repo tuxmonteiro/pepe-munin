@@ -80,7 +80,7 @@ public class PepeApiServiceTest  {
         HttpEntity<Event> request = new HttpEntity<>(event, headers);
 
         pepeApiService.sendMetrics(metric, project, tokenId);
-        verify(restTemplate, Mockito.atLeastOnce()).exchange(pepeApiEndpoint, HttpMethod.POST, request, JsonNode.class);
+        verify(restTemplate, Mockito.atLeastOnce()).exchange(pepeApiEndpoint + "/event", HttpMethod.POST, request, JsonNode.class);
     }
 
     private JsonNode getMetricMock() {
