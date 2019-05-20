@@ -42,7 +42,7 @@ public class PepeApiService {
         try {
             final Event event = buildEntity(metric, project, tokenId);
             HttpEntity<Event> request = new HttpEntity<>(event, headers);
-            restTemplate.exchange(pepeApiEndpoint, HttpMethod.POST, request, JsonNode.class);
+            restTemplate.exchange(pepeApiEndpoint + "/event", HttpMethod.POST, request, JsonNode.class);
         }
         catch (Exception e) {
             jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
