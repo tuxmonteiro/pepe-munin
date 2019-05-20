@@ -42,8 +42,8 @@ public class PepeApiService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         try {
-            JsonNode event = buildEntity(metric, project, tokenId);
-            HttpEntity<JsonNode> request = new HttpEntity<>(event, headers);
+            final Event event = buildEntity(metric, project, tokenId);
+            HttpEntity<Event> request = new HttpEntity<>(event, headers);
             restTemplate.exchange(pepeApiEndpoint, HttpMethod.POST, request, JsonNode.class);
         }
         catch (Exception e) {
@@ -51,7 +51,7 @@ public class PepeApiService {
         }
     }
 
-    JsonNode buildEntity(JsonNode metric, String project, String tokenId) {
+    Event buildEntity(JsonNode metric, String project, String tokenId) {
         Metadata metadata = new Metadata();
         metadata.setSource(source);
         metadata.setProject(project);
@@ -64,7 +64,7 @@ public class PepeApiService {
         event.setMetadata(metadata);
         event.setPayload(metric);
 
-        return mapper.valueToTree(event);
+        return event;
     }
 
 }

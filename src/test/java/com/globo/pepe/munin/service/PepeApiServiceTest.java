@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.UUID;
+
+import com.globo.pepe.common.model.Event;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,8 +36,8 @@ public class PepeApiServiceTest  {
         String project = UUID.randomUUID().toString();
         String tokenId = UUID.randomUUID().toString();
         JsonNode metric = getMetricMock();
-        final JsonNode eventJson = pepeApiService.buildEntity(metric, project, tokenId);
-        //TODO: test eventJson
+        final Event event = pepeApiService.buildEntity(metric, project, tokenId);
+        //TODO: test event
     }
 
     @Test
