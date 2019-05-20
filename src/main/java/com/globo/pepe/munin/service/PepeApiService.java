@@ -30,9 +30,9 @@ public class PepeApiService {
     private final JsonLoggerService jsonLoggerService;
     private final ObjectMapper mapper;
 
-    public PepeApiService(JsonLoggerService jsonLoggerService, ObjectMapper mapper) {
+    public PepeApiService(JsonLoggerService jsonLoggerService, ObjectMapper mapper, RestTemplate restTemplate) {
         this.mapper = mapper;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = restTemplate;
         this.jsonLoggerService = jsonLoggerService;
     }
 
