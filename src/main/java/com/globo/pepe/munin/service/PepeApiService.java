@@ -1,11 +1,9 @@
 package com.globo.pepe.munin.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.model.Event;
 import com.globo.pepe.common.model.Metadata;
 import com.globo.pepe.common.services.JsonLoggerService;
-import java.util.Calendar;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +11,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Calendar;
 
 @Service
 public class PepeApiService {
@@ -28,10 +28,8 @@ public class PepeApiService {
 
     private final RestTemplate restTemplate;
     private final JsonLoggerService jsonLoggerService;
-    private final ObjectMapper mapper;
 
-    public PepeApiService(JsonLoggerService jsonLoggerService, ObjectMapper mapper) {
-        this.mapper = mapper;
+    public PepeApiService(JsonLoggerService jsonLoggerService) {
         this.restTemplate = new RestTemplate();
         this.jsonLoggerService = jsonLoggerService;
     }
