@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.munin.repository.SofiaRepository;
-import java.util.List;
-import java.util.Map;
-import org.openstack4j.api.OSClient.OSClientV3;
-import org.openstack4j.model.identity.v3.Project;
-import org.openstack4j.model.identity.v3.Token;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class MuninService {
@@ -41,17 +39,13 @@ public class MuninService {
     @Scheduled(fixedDelayString = "${pepe.munin.fixedDelay}")
     public void send() {
         try {
-            OSClientV3 os = keystoneService.authenticate();
-            Token token = os.getToken();
-            Project tokenProject = token.getProject();
-            String project = tokenProject.getName();
-            String tokenId = token.getId();
+            if (keystoneService.authenticate()) {
+                final List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
 
-            final List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
-
-            for (Map<String, Object> metric : metrics) {
-                JsonNode jsonNode = mapper.valueToTree(metric);
-                pepeApiService.sendMetrics(jsonNode, project, tokenId);
+                for (Map<String, Object> metric : metrics) {
+                    JsonNode jsonNode = mapper.valueToTree(metric);
+                    pepeApiService.sendMetrics(jsonNode, keystoneService.getProjectName(), keystoneService.getTokenId());
+                }
             }
         } catch (Exception e){
             jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
