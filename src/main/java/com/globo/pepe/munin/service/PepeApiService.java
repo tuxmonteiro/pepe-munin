@@ -34,7 +34,7 @@ public class PepeApiService {
         this.jsonLoggerService = jsonLoggerService;
     }
 
-    void sendMetrics(JsonNode metric, String project, String tokenId){
+    boolean sendMetrics(JsonNode metric, String project, String tokenId){
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -44,10 +44,12 @@ public class PepeApiService {
             final Event event = buildEntity(metric, project);
             HttpEntity<Event> request = new HttpEntity<>(event, headers);
             restTemplate.exchange(pepeApiEndpoint + "/event", HttpMethod.POST, request, JsonNode.class);
+            return true;
         }
         catch (Exception e) {
             jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
         }
+        return false;
     }
 
     Event buildEntity(JsonNode metric, String project) {

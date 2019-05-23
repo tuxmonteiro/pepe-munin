@@ -44,9 +44,9 @@ public class MuninService {
 
                 int count = 0;
                 for (Map<String, Object> metric : metrics) {
-                    count++;
                     JsonNode jsonNode = mapper.valueToTree(metric);
-                    pepeApiService.sendMetrics(jsonNode, keystoneService.getProjectName(), keystoneService.getTokenId());
+                    boolean result = pepeApiService.sendMetrics(jsonNode, keystoneService.getProjectName(), keystoneService.getTokenId());
+                    count = result ? count + 1 : count;
                 }
                 jsonLoggerService.newLogger(getClass()).message("sent " + count + " events to pepe-api").sendInfo();
             }
