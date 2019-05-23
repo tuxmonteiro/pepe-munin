@@ -42,10 +42,13 @@ public class MuninService {
             if (keystoneService.authenticate()) {
                 final List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
 
+                int count = 0;
                 for (Map<String, Object> metric : metrics) {
+                    count++;
                     JsonNode jsonNode = mapper.valueToTree(metric);
                     pepeApiService.sendMetrics(jsonNode, keystoneService.getProjectName(), keystoneService.getTokenId());
                 }
+                jsonLoggerService.newLogger(getClass()).message("sent " + count + " events to pepe-api").sendInfo();
             }
         } catch (Exception e){
             jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);

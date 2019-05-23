@@ -1,5 +1,6 @@
 package com.globo.pepe.munin.service;
 
+import com.globo.pepe.common.services.JsonLoggerService;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.api.exceptions.AuthenticationException;
 import org.openstack4j.model.common.Identifier;
@@ -35,10 +36,17 @@ public class KeystoneService {
 
     private AbstractMap.Entry<OSClientV3, Date> osClientWithExpires = new SimpleImmutableEntry<>(null, new Date());
 
+    private final JsonLoggerService loggerService;
+
+    public KeystoneService(JsonLoggerService loggerService) {
+        this.loggerService = loggerService;
+    }
+
     boolean authenticate() throws Exception {
         synchronized (semaphore) {
             final Date currentDate = new Date();
             if (osClientWithExpires.getKey() == null || currentDate.after(osClientWithExpires.getValue())) {
+                loggerService.newLogger(getClass()).message("Token expired").sendWarn();
                 final OSClientV3 osClient = OSFactory.builderV3()
                         .endpoint(keystoneEndPoint)
                         .credentials(user, password, Identifier.byId(domain))
@@ -50,6 +58,7 @@ public class KeystoneService {
                     final Date expires = osClient.getToken().getExpires();
                     osClientWithExpires = new SimpleImmutableEntry<>(osClient, expires);
                 }
+                loggerService.newLogger(getClass()).message("Using new keystone token").sendWarn();
             }
         }
         return osClientWithExpires.getKey() != null;
