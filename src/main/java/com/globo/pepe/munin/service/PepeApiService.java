@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.globo.pepe.common.model.Event;
 import com.globo.pepe.common.model.Metadata;
 import com.globo.pepe.common.services.JsonLoggerService;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -60,7 +61,7 @@ public class PepeApiService {
         metadata.setTriggerName(triggerName);
 
         final Event event = new Event();
-        event.setId(Long.toString(Calendar.getInstance().getTimeInMillis()));
+        event.setId(source.toUpperCase() + "-" + UUID.randomUUID().toString());
         event.setMetadata(metadata);
         event.setPayload(metric);
 
