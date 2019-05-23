@@ -56,11 +56,9 @@ public class PepeApiServiceTest  {
     @Test
     public void buildRequestTest() {
         String project = UUID.randomUUID().toString();
-        String tokenId = UUID.randomUUID().toString();
         JsonNode metric = getMetricMock();
-        final Event event = pepeApiService.buildEntity(metric, project, tokenId);
+        final Event event = pepeApiService.buildEntity(metric, project);
         assertEquals(event.getMetadata().getProject(), project);
-        assertEquals(event.getMetadata().getToken(),tokenId);
         assertEquals(event.getPayload(), metric);
     }
 
@@ -72,10 +70,11 @@ public class PepeApiServiceTest  {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("X-Auth-Token", tokenId);
 
         final Event event = new Event();
 
-        when(pepeApiService.buildEntity(metric, project, tokenId)).thenReturn(event);
+        when(pepeApiService.buildEntity(metric, project)).thenReturn(event);
 
         HttpEntity<Event> request = new HttpEntity<>(event, headers);
 

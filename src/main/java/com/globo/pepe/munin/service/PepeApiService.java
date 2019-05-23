@@ -38,9 +38,10 @@ public class PepeApiService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("X-Auth-Token", tokenId);
 
         try {
-            final Event event = buildEntity(metric, project, tokenId);
+            final Event event = buildEntity(metric, project);
             HttpEntity<Event> request = new HttpEntity<>(event, headers);
             restTemplate.exchange(pepeApiEndpoint + "/event", HttpMethod.POST, request, JsonNode.class);
         }
@@ -49,11 +50,10 @@ public class PepeApiService {
         }
     }
 
-    Event buildEntity(JsonNode metric, String project, String tokenId) {
+    Event buildEntity(JsonNode metric, String project) {
         Metadata metadata = new Metadata();
         metadata.setSource(source);
         metadata.setProject(project);
-        metadata.setToken(tokenId);
         metadata.setTimestamp(Calendar.getInstance().getTimeInMillis());
         metadata.setTriggerName(triggerName);
 
