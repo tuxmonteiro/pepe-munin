@@ -9,6 +9,8 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:""}
+  pid:
+    file: ${PID_FILE:/tmp/pepe-chapolin.pid}
 
 pepe:
   logging:
