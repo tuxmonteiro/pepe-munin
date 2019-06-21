@@ -16,10 +16,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class SofiaRepositoryTests {
+public class SofiaProviderServiceTests {
 
     @MockBean
-    private SofiaRepository sofiaRepository;
+    private SofiaProviderService sofiaRepository;
 
     @Test
     public void findByMetricsTest() {

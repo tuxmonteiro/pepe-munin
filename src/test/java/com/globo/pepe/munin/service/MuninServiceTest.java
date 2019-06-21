@@ -10,7 +10,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.services.JsonLoggerService;
-import com.globo.pepe.munin.repository.SofiaRepository;
+import com.globo.pepe.munin.repository.SofiaProviderService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -41,7 +41,7 @@ public class MuninServiceTest {
     private ObjectMapper mapper;
 
     @MockBean
-    private SofiaRepository sofiaRepository;
+    private SofiaProviderService sofiaProviderService;
 
     @MockBean
     private PepeApiService pepeApiService;
@@ -107,7 +107,7 @@ public class MuninServiceTest {
         metrics.add(metricValue);
         metricValueJson = mapper.valueToTree(metricValue);
 
-        when(sofiaRepository.findByMetrics(anyString())).thenReturn(metrics);
+        when(sofiaProviderService.findByMetrics(anyString())).thenReturn(metrics);
     }
 
     @Test

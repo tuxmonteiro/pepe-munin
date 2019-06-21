@@ -8,12 +8,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SofiaRepository {
+public class SofiaProviderService {
 
     private final JdbcTemplate jdbcTemplate;
     private final JsonLoggerService jsonLoggerService;
 
-    public SofiaRepository(JsonLoggerService jsonLoggerService, JdbcTemplate jdbcTemplate) {
+    public SofiaProviderService(JsonLoggerService jsonLoggerService, JdbcTemplate jdbcTemplate) {
         this.jsonLoggerService = jsonLoggerService;
         this.jdbcTemplate = jdbcTemplate;
     }

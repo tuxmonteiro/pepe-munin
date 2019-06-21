@@ -3,7 +3,7 @@ package com.globo.pepe.munin.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.services.JsonLoggerService;
-import com.globo.pepe.munin.repository.SofiaRepository;
+import com.globo.pepe.munin.repository.SofiaProviderService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -17,19 +17,19 @@ public class MuninService {
     @Value("${pepe.munin.query}")
     private String queryWorker;
 
-    private final SofiaRepository sofiaRepository;
+    private final SofiaProviderService sofiaProviderService;
     private final PepeApiService pepeApiService;
     private final KeystoneService keystoneService;
     private final ObjectMapper mapper;
     private final JsonLoggerService jsonLoggerService;
 
-    public MuninService(SofiaRepository sofiaRepository,
+    public MuninService(SofiaProviderService sofiaProviderService,
         PepeApiService pepeApiService,
         KeystoneService keystoneService,
         ObjectMapper mapper,
         JsonLoggerService jsonLoggerService) {
 
-        this.sofiaRepository = sofiaRepository;
+        this.sofiaProviderService = sofiaProviderService;
         this.pepeApiService = pepeApiService;
         this.keystoneService = keystoneService;
         this.mapper = mapper;
@@ -40,7 +40,7 @@ public class MuninService {
     public void send() {
         try {
             if (keystoneService.authenticate()) {
-                final List<Map<String, Object>> metrics = sofiaRepository.findByMetrics(queryWorker);
+                final List<Map<String, Object>> metrics = sofiaProviderService.findByMetrics(queryWorker);
 
                 int count = 0;
                 for (Map<String, Object> metric : metrics) {
