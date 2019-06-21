@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 public class Provider extends AbstractEntity {
 
     @Column(nullable = false, unique = true)
-    private final String name;
+    private String name;
 
     @OneToMany(mappedBy = "provider")
     private Set<Query> queries = new HashSet<>();
@@ -43,6 +43,13 @@ public class Provider extends AbstractEntity {
 
     public String getName() {
         return name;
+    }
+
+    public Provider setName(String name) {
+        Assert.hasText(name, "Name must not be null or empty!");
+
+        this.name = name;
+        return this;
     }
 
     public Set<Query> getQueries() {

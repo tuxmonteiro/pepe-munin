@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
 public class Project {
 
     @Column(nullable = false, unique = true)
-    private final String name;
+    private String name;
 
     @Embedded
     private final Keystone keystone;
@@ -49,6 +49,13 @@ public class Project {
 
     public String getName() {
         return name;
+    }
+
+    public Project setName(String name) {
+        Assert.hasText(name, "Name must not be null or empty!");
+
+        this.name = name;
+        return this;
     }
 
     public Keystone getKeystone() {

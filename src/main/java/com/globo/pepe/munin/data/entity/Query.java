@@ -29,6 +29,9 @@ import org.springframework.util.Assert;
 @Entity
 public class Query extends AbstractEntity {
 
+    @Column(nullable = false, unique = true)
+    private String name;
+
     @Column(nullable = false)
     private final String value;
 
@@ -40,14 +43,27 @@ public class Query extends AbstractEntity {
     @JoinColumn(name = "project_id", nullable = false, foreignKey = @ForeignKey(name="FK_query_project"))
     private final Project project;
 
-    public Query(String value, Provider provider, Project project) {
+    public Query(String name, String value, Provider provider, Project project) {
+        Assert.hasText(name, "Name must not be null or empty!");
         Assert.hasText(value, "Value must not be null or empty!");
         Assert.notNull(provider, "Provider must not be null!");
         Assert.notNull(project, "Project must not be null!");
 
+        this.name = name;
         this.value = value;
         this.provider = provider;
         this.project = project;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Query setName(String name) {
+        Assert.hasText(name, "Name must not be null or empty!");
+
+        this.name = name;
+        return this;
     }
 
     public String getValue() {

@@ -32,7 +32,7 @@ public class Keystone extends AbstractEntity {
 
     @SuppressWarnings("DefaultAnnotationParam")
     @Column(nullable = true)
-    private final String password;
+    private String password;
 
     public Keystone(String login, String password) {
         Assert.hasText(login, "Login must not be null or empty!");
@@ -48,5 +48,10 @@ public class Keystone extends AbstractEntity {
     @JsonIgnore
     public String getPassword() {
         return password;
+    }
+
+    public Keystone setPassword(String password) {
+        this.password = password;
+        return this;
     }
 }
