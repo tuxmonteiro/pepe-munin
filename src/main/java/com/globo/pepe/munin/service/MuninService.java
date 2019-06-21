@@ -3,7 +3,6 @@ package com.globo.pepe.munin.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.services.JsonLoggerService;
-import com.globo.pepe.munin.repository.SofiaProviderService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

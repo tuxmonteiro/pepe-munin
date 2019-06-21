@@ -10,7 +10,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.services.JsonLoggerService;
-import com.globo.pepe.munin.repository.SofiaProviderService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;

@@ -1,4 +1,4 @@
-package com.globo.pepe.munin.repository;
+package com.globo.pepe.munin.service;
 
 import com.globo.pepe.common.services.JsonLoggerService;
 import java.util.Collections;
