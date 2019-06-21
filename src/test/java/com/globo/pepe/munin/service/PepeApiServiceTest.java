@@ -45,14 +45,6 @@ public class PepeApiServiceTest  {
     @Autowired
     private ObjectMapper mapper;
 
-    @Before
-    public void setUp(){
-    }
-
-    @Test
-    public void contextLoads() {
-    }
-
     @Test
     public void buildRequestTest() {
         String project = UUID.randomUUID().toString();

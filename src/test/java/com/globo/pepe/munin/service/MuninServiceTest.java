@@ -47,7 +47,7 @@ public class MuninServiceTest {
 
     private JsonNode metricValueJson = null;
 
-    public static ClientAndServer keystoneServerMock;
+    private static ClientAndServer keystoneServerMock;
 
     @BeforeClass
     public static void setupClass() throws IOException {
