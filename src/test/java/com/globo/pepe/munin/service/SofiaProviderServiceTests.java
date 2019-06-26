@@ -21,7 +21,6 @@ package com.globo.pepe.munin.service;
 
 import static org.junit.Assert.assertThat;
 
-import com.globo.pepe.munin.service.SofiaProviderService;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

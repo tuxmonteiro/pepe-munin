@@ -1,0 +1,33 @@
+build:
+  project: '@project.artifactId@'
+  timestamp: '@timestamp@'
+  version: '@project.version@'
+
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test;MODE=MySQL
+    username: sa
+    password: sa
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+pepe:
+  logging:
+    tags: default
+  api:
+    endpoint: http://127.0.0.1:8000
+  keystone:
+    url: http://127.0.0.1:5000/v3
+    user: user
+    password: password
+    domain: default
+    project: pepe
+  munin:
+    query: SELECT 1
+    source: munin
+    fixedDelay: 30000
+    trigger_name: acs-collector
+  server:
+    port: 8000
