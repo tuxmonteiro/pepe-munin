@@ -22,6 +22,8 @@ package com.globo.pepe.munin.service;
 import com.globo.pepe.common.model.munin.Driver;
 import com.globo.pepe.common.model.munin.Driver.Type;
 import com.globo.pepe.common.repository.munin.DriverRepository;
+import com.globo.pepe.common.services.JsonLoggerService;
+import com.globo.pepe.common.services.JsonLoggerService.JsonLogger;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.net.URL;
@@ -48,6 +50,8 @@ import org.springframework.util.Assert;
 
 @Service
 public class HikariFactoryService {
+
+    private final JsonLoggerService loggerService;
 
     private static class DriverShim implements java.sql.Driver {
         private final java.sql.Driver driver;
@@ -95,20 +99,25 @@ public class HikariFactoryService {
     private final DriverRepository driverRepository;
     private final Map<String, java.sql.Driver> driversRegistered = new HashMap<>();
 
-    public HikariFactoryService(DriverRepository driverRepository) {
+    public HikariFactoryService(JsonLoggerService loggerService,
+        DriverRepository driverRepository) {
+        this.loggerService = loggerService;
         this.driverRepository = driverRepository;
     }
 
     @Scheduled(fixedRate = 10_000)
     public void syncDriverRegistered() {
         final List<com.globo.pepe.common.model.munin.Driver> driverList = driverRepository.findByType(Type.JDBC);
-        System.out.println("Drivers: registered -> " + driversRegistered.size() + " / persisted (DB) -> " + driverList.size());
+
+        loggerService.newLogger(getClass())
+            .message("Drivers: registered -> " + driversRegistered.size() + " / persisted (DB) -> " + driverList.size()).sendInfo();
         driverList.forEach(driver -> {
             String driverClassName = driver.getName();
             if (!driversRegistered.keySet().contains(driverClassName)) {
                 DriverShim driverShim = registerDriver(new SimpleImmutableEntry<>(driverClassName, driver.getJar()));
                 driversRegistered.put(driverClassName, driverShim);
-                System.out.println(driverClassName + "/" + driver.getJar() + " driver registered");
+                loggerService.newLogger(getClass())
+                    .message(driverClassName + "/" + driver.getJar() + " driver registered").sendInfo();
             }
         });
         final Set<String> driversToRemove = new HashSet<>(driversRegistered.keySet());
@@ -117,7 +126,8 @@ public class HikariFactoryService {
             try {
                 DriverManager.deregisterDriver(driversRegistered.remove(className));
             } catch (SQLException e) {
-                System.err.println(e.getMessage());
+                loggerService.newLogger(getClass())
+                    .message(e.getMessage()).sendError();
             }
         });
     }

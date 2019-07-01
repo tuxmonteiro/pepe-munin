@@ -21,6 +21,7 @@ package com.globo.pepe.munin.service;
 
 import com.globo.pepe.common.repository.munin.ConnectionRepository;
 import com.globo.pepe.common.services.JsonLoggerService;
+import com.globo.pepe.common.services.JsonLoggerService.JsonLogger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,7 +52,8 @@ public class SofiaProviderService {
 
     public  List<Map<String, Object>> findByMetrics(String query) {
         if (muninConnection == null) {
-            System.out.println("Munin Connection not defined");
+            JsonLogger logger = jsonLoggerService.newLogger(getClass());
+            logger.message("Munin Connection not defined").sendWarn();
             muninConnection = connectionRepository.findAll().stream().findAny().orElse(null);
         }
         if (muninConnection != null) {
@@ -63,7 +65,8 @@ public class SofiaProviderService {
                 this.dataConnection = datasource.getConnection();
             } catch (Exception e) {
                 this.dataConnection = null;
-                System.err.println(e.getMessage());
+                JsonLogger logger = jsonLoggerService.newLogger(getClass());
+                logger.message(e.getMessage()).sendError();
             }
         }
         if (dataConnection != null) {
