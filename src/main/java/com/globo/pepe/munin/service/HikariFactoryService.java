@@ -166,7 +166,7 @@ public class HikariFactoryService {
     }
 
     private String getDriverLibPath(String driverJar) {
-        return "jar:" + driverJar + "!/";
+        return "jar:file:" + driverJar + "!/";
     }
 
 }
