@@ -51,7 +51,6 @@ public class SofiaProviderServiceTests {
         Mockito.when(sofiaRepository.findByMetrics(Mockito.anyString())).thenReturn(metrics);
         metrics = sofiaRepository.findByMetrics(Mockito.anyString());
         assertThat(metrics, Matchers.notNullValue());
-
     }
 
 

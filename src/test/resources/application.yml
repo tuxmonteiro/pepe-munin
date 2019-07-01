@@ -8,26 +8,28 @@ spring:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:test;MODE=MySQL
     username: sa
-    password: sa
+    password:
   jpa:
     hibernate:
       ddl-auto: create
+  pid:
+    file: ${PID_FILE:/tmp/pepe-chapolin.pid}
 
 pepe:
   logging:
-    tags: default
+    tags: ${LOGGING_TAGS:default}
   api:
-    endpoint: http://127.0.0.1:8000
+    endpoint: ${PEPE_ENDPOINT:http://127.0.0.1:8000}
   keystone:
-    url: http://127.0.0.1:5000/v3
-    user: user
-    password: password
-    domain: default
-    project: pepe
+    url: ${KEYSTONE_URL:http://127.0.0.1:5000/v3}
+    domain: ${KEYSTONE_DOMAIN:default}
   munin:
-    query: SELECT 1
-    source: munin
-    fixedDelay: 30000
-    trigger_name: acs-collector
+    source: ${MUNIN_SOURCE:munin}
+    fixedDelay: ${SCHEDULER_TIME:30000}
+    trigger_name: ${MUNIN_TRIGGER:acs-collector}
   server:
-    port: 8000
+    port: ${SERVER_PORT:8000}
+
+cors:
+  allowed-origins: ${CORS_ORIGINS:http://localhost}
+  allowed-methods: ${CORS_METHODS:GET,POST,DELETE,PATCH,PUT,HEAD,OPTIONS,TRACE,CONNECT}

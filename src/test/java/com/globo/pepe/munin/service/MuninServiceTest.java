@@ -133,5 +133,4 @@ public class MuninServiceTest {
         muninService.send();
         verify(pepeApiService, Mockito.atLeastOnce()).sendMetrics(metricValueJson, "admin", null);
     }
-
 }

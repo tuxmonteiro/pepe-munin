@@ -21,8 +21,10 @@ package com.globo.pepe.munin.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.globo.pepe.common.model.munin.Keystone;
+import com.globo.pepe.common.model.munin.Project;
+import com.globo.pepe.common.repository.munin.MetricRepository;
 import com.globo.pepe.common.services.JsonLoggerService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -32,21 +34,21 @@ import java.util.Map;
 @Service
 public class MuninService {
 
-    @Value("${pepe.munin.query}")
-    private String queryWorker;
-
+    private final MetricRepository metricRepository;
     private final SofiaProviderService sofiaProviderService;
     private final PepeApiService pepeApiService;
     private final KeystoneService keystoneService;
     private final ObjectMapper mapper;
     private final JsonLoggerService jsonLoggerService;
 
-    public MuninService(SofiaProviderService sofiaProviderService,
+    public MuninService(
+        MetricRepository metricRepository,
+        SofiaProviderService sofiaProviderService,
         PepeApiService pepeApiService,
         KeystoneService keystoneService,
         ObjectMapper mapper,
         JsonLoggerService jsonLoggerService) {
-
+        this.metricRepository = metricRepository;
         this.sofiaProviderService = sofiaProviderService;
         this.pepeApiService = pepeApiService;
         this.keystoneService = keystoneService;
@@ -56,24 +58,30 @@ public class MuninService {
 
     @Scheduled(fixedDelayString = "${pepe.munin.fixedDelay}")
     public void send() {
-        try {
-            if (keystoneService.authenticate()) {
-                final List<Map<String, Object>> metrics = sofiaProviderService.findByMetrics(queryWorker);
+        metricRepository.findAll().forEach(metric -> {
+            try {
+                final Project project = metric.getProject();
+                final Keystone keystone = project.getKeystone();
+                if (keystoneService.authenticate(project.getName(), keystone.getLogin(), keystone.getPassword())) {
+                    String queryWorker = metric.getQuery();
+                    final List<Map<String, Object>> allTable = sofiaProviderService.findByMetrics(queryWorker);
 
-                int count = 0;
-                for (Map<String, Object> metric : metrics) {
-                    JsonNode metricJson = mapper.valueToTree(metric);
-                    String projectName = keystoneService.getProjectName();
-                    String tokenId = keystoneService.getTokenId();
-                    if (pepeApiService.sendMetrics(metricJson, projectName, tokenId)) {
-                        count++;
+                    int count = 0;
+                    for (Map<String, Object> row : allTable) {
+                        JsonNode metricJson = mapper.valueToTree(row);
+                        String projectName = project.getName();
+                        String tokenId = keystoneService.getTokenId();
+                        if (pepeApiService.sendMetrics(metricJson, projectName, tokenId)) {
+                            count++;
+                        }
                     }
+                    jsonLoggerService.newLogger(getClass())
+                        .message("sent " + count + "/" + allTable.size() + " events to pepe-api").sendInfo();
                 }
-                jsonLoggerService.newLogger(getClass()).message("sent " + count + "/" + metrics.size() + " events to pepe-api").sendInfo();
+            } catch (Exception e) {
+                jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
             }
-        } catch (Exception e){
-            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
-        }
+        });
     }
 
 }
