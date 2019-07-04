@@ -49,7 +49,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest({MuninService.class, PepeApiService.class, KeystoneService.class, JsonLoggerService.class, ObjectMapper.class})
+@WebMvcTest({
+    MuninService.class,
+    PepeApiService.class,
+    KeystoneService.class,
+    JsonLoggerService.class,
+    ObjectMapper.class,
+    SofiaProviderService.class
+})
 public class MuninServiceTest {
 
     @Autowired
