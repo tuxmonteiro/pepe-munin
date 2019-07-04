@@ -5,13 +5,13 @@ build:
 
 spring:
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:test;MODE=MySQL
-    username: sa
-    password:
+    driver-class-name: ${DB_API_DRIVER:org.h2.Driver}
+    url: ${DB_API_URL:jdbc:h2:mem:test;MODE=MySQL}
+    username: ${DB_API_USER:sa}
+    password: ${DB_API_PASSWORD:}
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: ${DB_API_DDL:create}
   pid:
     file: ${PID_FILE:/tmp/pepe-chapolin.pid}
 

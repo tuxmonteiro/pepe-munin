@@ -19,6 +19,7 @@
 
 package com.globo.pepe.munin;
 
+import com.globo.pepe.common.configuration.DatabaseConfiguration;
 import com.globo.pepe.common.controller.HealthcheckController;
 import com.globo.pepe.common.controller.InfoController;
 import com.globo.pepe.common.services.JsonLoggerService;
@@ -30,7 +31,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@Import({JsonLoggerService.class, HealthcheckController.class, InfoController.class})
+@Import({JsonLoggerService.class, HealthcheckController.class, InfoController.class, DatabaseConfiguration.class})
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 @EnableScheduling
 @EntityScan( basePackages = {"com.globo.pepe.common.model.munin"} )
