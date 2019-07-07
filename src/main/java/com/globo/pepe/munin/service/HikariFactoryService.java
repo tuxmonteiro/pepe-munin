@@ -106,7 +106,7 @@ public class HikariFactoryService {
         this.driverRepository = driverRepository;
     }
 
-    @Scheduled(fixedRate = 10_000)
+    @Scheduled(fixedDelayString = "${pepe.munin.jdbc.register-sched-delay}")
     public void syncDriverRegistered() {
         final List<Driver> muninDriverList = driverRepository.findByTypeAndJarNotNull(Type.JDBC);
         final List<java.sql.Driver> sqlDrivers = DriverManager.drivers().collect(Collectors.toList());
@@ -188,7 +188,7 @@ public class HikariFactoryService {
         drivers.forEach(driver -> {
             if (driver instanceof java.sql.Driver) {
                 String driverName = getRealClassName((java.sql.Driver) driver);
-                loggerService.newLogger(getClass()).message(driverName + " already loaded").sendInfo();
+                loggerService.newLogger(getClass()).message(driverName + " already loaded").sendDebug();
                 driverMap.put(driverName, driver);
             } else if (driver instanceof Driver) {
                 driverMap.put(((Driver)driver).getName(), driver);
