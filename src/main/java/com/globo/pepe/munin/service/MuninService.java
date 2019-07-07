@@ -79,7 +79,9 @@ public class MuninService {
                         .message("sent " + count + "/" + allTable.size() + " events to pepe-api").sendInfo();
                 }
             } catch (Exception e) {
-                jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
+                final String erroMsg = String.valueOf(e.getCause());
+                jsonLoggerService.newLogger(getClass()).message(erroMsg).sendError();
+                jsonLoggerService.newLogger(getClass()).message(erroMsg).sendDebug(e);
             }
         });
     }
