@@ -56,7 +56,7 @@ public class MuninService {
         this.jsonLoggerService = jsonLoggerService;
     }
 
-    @Scheduled(fixedDelayString = "${pepe.munin.fixedDelay}")
+    @Scheduled(fixedDelayString = "${pepe.munin.send-sched-delay}")
     public void send() {
         metricRepository.findAll().forEach(metric -> {
             try {
