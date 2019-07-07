@@ -45,7 +45,11 @@ public class SofiaProviderService {
     private com.globo.pepe.common.model.munin.Connection muninConnection = null;
     private Connection dataConnection = null;
 
-    public SofiaProviderService(JsonLoggerService jsonLoggerService, HikariFactoryService hikariFactoryService, ConnectionRepository connectionRepository) {
+    public SofiaProviderService(
+            JsonLoggerService jsonLoggerService,
+            HikariFactoryService hikariFactoryService,
+            ConnectionRepository connectionRepository) {
+
         this.jsonLoggerService = jsonLoggerService;
         this.hikariFactoryService = hikariFactoryService;
         this.connectionRepository = connectionRepository;
