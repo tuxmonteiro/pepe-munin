@@ -19,9 +19,10 @@
 
 package com.globo.pepe.munin.service;
 
+import com.globo.pepe.common.model.munin.Connection;
 import com.globo.pepe.common.services.JsonLoggerService;
-import com.globo.pepe.common.services.JsonLoggerService.JsonLogger;
-import java.sql.Connection;
+
+import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -30,57 +31,34 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.sql.DataSource;
 
-import com.globo.pepe.munin.repository.ConnectionRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SofiaProviderService {
 
-    private final HikariFactoryService hikariFactoryService;
-    private final ConnectionRepository connectionRepository;
     private final JsonLoggerService jsonLoggerService;
-
-    private com.globo.pepe.common.model.munin.Connection muninConnection = null;
-    private Connection dataConnection = null;
+    private final HikariFactoryService hikariFactoryService;
 
     public SofiaProviderService(
             JsonLoggerService jsonLoggerService,
-            HikariFactoryService hikariFactoryService,
-            ConnectionRepository connectionRepository) {
+            HikariFactoryService hikariFactoryService) {
 
         this.jsonLoggerService = jsonLoggerService;
         this.hikariFactoryService = hikariFactoryService;
-        this.connectionRepository = connectionRepository;
     }
 
-    public  List<Map<String, Object>> findByMetrics(String query) {
-        if (muninConnection == null) {
-            JsonLogger logger = jsonLoggerService.newLogger(getClass());
-            logger.message("Munin Connection not defined").sendWarn();
-            muninConnection = connectionRepository.findAll().stream().findAny().orElse(null);
-        }
-        if (muninConnection != null) {
-            try {
-                String url = muninConnection.getUrl();
-                String login = muninConnection.getLogin();
-                String password = muninConnection.getPassword();
-                final DataSource datasource = hikariFactoryService.dataSource(url, login, password);
-                this.dataConnection = datasource.getConnection();
-            } catch (Exception e) {
-                this.dataConnection = null;
-                JsonLogger logger = jsonLoggerService.newLogger(getClass());
-                logger.message(e.getMessage()).sendError();
-            }
-        }
-        if (dataConnection != null) {
-            try {
-            final PreparedStatement pstmt = dataConnection.prepareStatement(query);
+    public  List<Map<String, Object>> findByMetrics(String query, Connection muninConnection) {
+        try {
+            String url = muninConnection.getUrl();
+            String login = muninConnection.getLogin();
+            String password = muninConnection.getPassword();
+            final DataSource datasource = hikariFactoryService.dataSource(url, login, password);
+            final PreparedStatement pstmt =  datasource.getConnection().prepareStatement(query);
             final ResultSet resultSet = pstmt.executeQuery();
             final ResultSetMetaData metadata = resultSet.getMetaData();
             int columns = metadata.getColumnCount();
-                final List<Map<String, Object>> resultList = new ArrayList<>();
+            final List<Map<String, Object>> resultList = new ArrayList<>();
             while (resultSet.next()){
                 Map<String, Object> row = new HashMap<>(columns);
                 for(int columnPos=1; columnPos<=columns; ++columnPos){
@@ -88,11 +66,11 @@ public class SofiaProviderService {
                 }
                 resultList.add(row);
             }
-                return resultList;
-            } catch (Exception e) {
-                jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
-            }
+            return resultList;
+        } catch (Exception e) {
+            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
         }
+
         return Collections.emptyList();
     }
 

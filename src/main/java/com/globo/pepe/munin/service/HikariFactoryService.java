@@ -25,33 +25,71 @@ import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.munin.repository.DriverRepository;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.sql.DataSource;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class HikariFactoryService {
 
     private final JsonLoggerService loggerService;
 
+    private final Long dataSourceCacheTtl;
+
+    private class CacheDB {
+
+        private final Map<String, DataSource> dataSourceMap = new ConcurrentHashMap<>();
+        private final Map<String, Long> ttlMap = new ConcurrentHashMap<>();
+
+        synchronized DataSource get(String key) {
+            checkTtl(key);
+            return dataSourceMap.get(key);
+        }
+
+        synchronized DataSource put(String key, DataSource dataSource) {
+            ttlMap.put(key, System.currentTimeMillis());
+            return dataSourceMap.put(key, dataSource);
+        }
+
+        private void checkTtl(String key) {
+            final Long ttl;
+            if ((ttl = ttlMap.get(key)) != null &&
+                 ttl < System.currentTimeMillis() - Optional.ofNullable(dataSourceCacheTtl).orElse(10000L)) {
+
+                ttlMap.remove(key);
+                final HikariDataSource dataSource = (HikariDataSource) dataSourceMap.remove(key);
+                dataSource.close();
+            }
+        }
+    }
+
     private static class DriverShim implements java.sql.Driver {
+
         private final java.sql.Driver driver;
 
         DriverShim(java.sql.Driver driver) {
@@ -98,11 +136,15 @@ public class HikariFactoryService {
         }
     }
 
+    private final CacheDB cacheDB = new CacheDB();
+
     private final DriverRepository driverRepository;
 
     public HikariFactoryService(JsonLoggerService loggerService,
-        DriverRepository driverRepository) {
+                                DriverRepository driverRepository,
+                                @Value("${pepe.munin.jdbc.datasource-cache-ttl}") Long dataSourceCacheTtl) {
         this.loggerService = loggerService;
+        this.dataSourceCacheTtl = dataSourceCacheTtl;
         this.driverRepository = driverRepository;
     }
 
@@ -149,15 +191,47 @@ public class HikariFactoryService {
         });
     }
 
-    public DataSource dataSource(String jdbcUrl, String username, String password) {
+    public synchronized DataSource dataSource(String jdbcUrl, String username, String password) {
+        final DataSource dataSource;
+        String dataSourceKey = Base64.getEncoder().encodeToString((jdbcUrl + username + password).getBytes());
+        if ((dataSource = cacheDB.get(dataSourceKey)) != null) {
+            return dataSource;
+        }
+        return cacheDB.put(dataSourceKey, new HikariDataSource(getHikariConfig(jdbcUrl, username, password)));
+    }
+
+    private HikariConfig getHikariConfig(String jdbcUrl, String username, String password) {
         final HikariConfig config = new HikariConfig();
         config.setJdbcUrl(jdbcUrl);
         config.setUsername(username);
         config.setPassword(password);
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        return new HikariDataSource(config);
+        final String[] jdbcUrlSplit = jdbcUrl.split("[?]");
+        if (jdbcUrlSplit.length > 1) {
+            Stream.of(jdbcUrlSplit[1].split("&")).forEach(queryStr -> {
+                final String[] queryStrKeyValue = queryStr.split("=");
+                String key = queryStrKeyValue[0];
+                String value = "";
+                if (queryStrKeyValue.length > 1) {
+                    try {
+                        value = URLDecoder.decode(queryStrKeyValue[1], StandardCharsets.UTF_8.name());
+                    } catch (UnsupportedEncodingException ignore) {
+                        // ignored
+                    }
+                }
+                config.addDataSourceProperty(key, value);
+            });
+        }
+        final Properties dataSourceProperties = config.getDataSourceProperties();
+        if (dataSourceProperties.get("cachePrepStmts") == null) {
+            config.addDataSourceProperty("cachePrepStmts", "true");
+        }
+        if (dataSourceProperties.get("prepStmtCacheSize") == null) {
+            config.addDataSourceProperty("prepStmtCacheSize", "250");
+        }
+        if (dataSourceProperties.get("prepStmtCacheSqlLimit") == null) {
+            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        }
+        return config;
     }
 
     private DriverShim convertToSqlDriver(String driverClassName, String driverJar) {

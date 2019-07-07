@@ -21,6 +21,8 @@ package com.globo.pepe.munin.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.globo.pepe.common.model.munin.Connection;
+import com.globo.pepe.common.model.munin.Driver;
 import com.globo.pepe.common.model.munin.Keystone;
 import com.globo.pepe.common.model.munin.Project;
 import com.globo.pepe.common.services.JsonLoggerService;
@@ -28,26 +30,33 @@ import com.globo.pepe.munin.repository.MetricRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Objects.requireNonNull;
 
 @Service
 public class MuninService {
 
     private final MetricRepository metricRepository;
-    private final SofiaProviderService sofiaProviderService;
     private final PepeApiService pepeApiService;
     private final KeystoneService keystoneService;
     private final ObjectMapper mapper;
     private final JsonLoggerService jsonLoggerService;
 
+    private final ConcurrentHashMap<Long, SofiaProviderService> jbdcProviders =  new ConcurrentHashMap<>();
+    private final SofiaProviderService sofiaProviderService;
+
     public MuninService(
-        MetricRepository metricRepository,
-        SofiaProviderService sofiaProviderService,
-        PepeApiService pepeApiService,
-        KeystoneService keystoneService,
-        ObjectMapper mapper,
-        JsonLoggerService jsonLoggerService) {
+            MetricRepository metricRepository,
+            SofiaProviderService sofiaProviderService,
+            PepeApiService pepeApiService,
+            KeystoneService keystoneService,
+            ObjectMapper mapper,
+            JsonLoggerService jsonLoggerService) {
         this.metricRepository = metricRepository;
         this.sofiaProviderService = sofiaProviderService;
         this.pepeApiService = pepeApiService;
@@ -62,10 +71,17 @@ public class MuninService {
             try {
                 final Project project = metric.getProject();
                 final Keystone keystone = project.getKeystone();
+                final Connection muninConnection = metric.getConnection();
+                if (muninConnection == null) {
+                    jsonLoggerService.newLogger(getClass()).message("Munin Connection not defined").sendWarn();
+                    return;
+                }
                 if (keystoneService.authenticate(project.getName(), keystone.getLogin(), keystone.getPassword())) {
                     String queryWorker = metric.getQuery();
-                    final List<Map<String, Object>> allTable = sofiaProviderService.findByMetrics(queryWorker);
-
+                    final List<Map<String, Object>> allTable = new ArrayList<>();
+                    if (Driver.Type.JDBC.equals(muninConnection.getDriver().getType())) {
+                        allTable.addAll(sofiaProviderService.findByMetrics(queryWorker, muninConnection));
+                    }
                     int count = 0;
                     for (Map<String, Object> row : allTable) {
                         JsonNode metricJson = mapper.valueToTree(row);
