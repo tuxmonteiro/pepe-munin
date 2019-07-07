@@ -20,11 +20,15 @@
 package com.globo.pepe.munin.service;
 
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.globo.pepe.common.model.munin.Connection;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,8 +52,8 @@ public class SofiaProviderServiceTests {
         metricValue.put("ram","00");
         metricValue.put("so","linux");
         metrics.add(metricValue);
-        Mockito.when(sofiaRepository.findByMetrics(Mockito.anyString())).thenReturn(metrics);
-        metrics = sofiaRepository.findByMetrics(Mockito.anyString());
+        Mockito.when(sofiaRepository.findByMetrics(anyString(), any(Connection.class))).thenReturn(metrics);
+        metrics = sofiaRepository.findByMetrics(anyString(), any(Connection.class));
         assertThat(metrics, Matchers.notNullValue());
     }
 

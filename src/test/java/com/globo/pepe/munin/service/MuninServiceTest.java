@@ -19,6 +19,7 @@
 
 package com.globo.pepe.munin.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.globo.pepe.common.model.munin.Connection;
 import com.globo.pepe.common.services.JsonLoggerService;
 import java.io.IOException;
 import java.io.InputStream;
@@ -132,7 +134,7 @@ public class MuninServiceTest {
         metrics.add(metricValue);
         metricValueJson = mapper.valueToTree(metricValue);
 
-        when(sofiaProviderService.findByMetrics(anyString())).thenReturn(metrics);
+        when(sofiaProviderService.findByMetrics(anyString(), any(Connection.class))).thenReturn(metrics);
     }
 
     @Test
