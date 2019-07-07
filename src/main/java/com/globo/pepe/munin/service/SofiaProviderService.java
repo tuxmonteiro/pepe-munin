@@ -19,7 +19,6 @@
 
 package com.globo.pepe.munin.service;
 
-import com.globo.pepe.common.repository.munin.ConnectionRepository;
 import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.common.services.JsonLoggerService.JsonLogger;
 import java.sql.Connection;
@@ -32,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
+
+import com.globo.pepe.munin.repository.ConnectionRepository;
 import org.springframework.stereotype.Service;
 
 @Service

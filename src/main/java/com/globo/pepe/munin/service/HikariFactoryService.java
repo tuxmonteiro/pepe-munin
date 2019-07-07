@@ -21,9 +21,8 @@ package com.globo.pepe.munin.service;
 
 import com.globo.pepe.common.model.munin.Driver;
 import com.globo.pepe.common.model.munin.Driver.Type;
-import com.globo.pepe.common.repository.munin.DriverRepository;
 import com.globo.pepe.common.services.JsonLoggerService;
-import com.globo.pepe.common.services.JsonLoggerService.JsonLogger;
+import com.globo.pepe.munin.repository.DriverRepository;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.net.URL;

@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.model.munin.Keystone;
 import com.globo.pepe.common.model.munin.Project;
-import com.globo.pepe.common.repository.munin.MetricRepository;
 import com.globo.pepe.common.services.JsonLoggerService;
+import com.globo.pepe.munin.repository.MetricRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 

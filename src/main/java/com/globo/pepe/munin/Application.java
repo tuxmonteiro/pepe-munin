@@ -35,7 +35,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 @EnableScheduling
 @EntityScan( basePackages = {"com.globo.pepe.common.model.munin"} )
-@EnableJpaRepositories(basePackages = "com.globo.pepe.common.repository.munin")
+@EnableJpaRepositories(basePackages = "com.globo.pepe.munin.repository")
 public class Application {
 
 	public static void main(String[] args) {
