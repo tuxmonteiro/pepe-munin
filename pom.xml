@@ -59,6 +59,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>11</java.version>
+
+    <h2.version>1.4.199</h2.version>
+    <mysql-connector.version>8.0.16</mysql-connector.version>
+    <openstack4j.version>3.2.0</openstack4j.version>
+    <pepe-common.version>1.0.0-SNAPSHOT</pepe-common.version>
   </properties>
 
   <dependencies>
@@ -93,12 +98,12 @@
     <dependency>
       <groupId>com.globo.pepe</groupId>
       <artifactId>pepe-common</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${pepe-common.version}</version>
     </dependency>
     <dependency>
       <groupId>org.pacesys</groupId>
       <artifactId>openstack4j</artifactId>
-      <version>3.2.0</version>
+      <version>${openstack4j.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -111,7 +116,12 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.199</version>
+      <version>${h2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>${mysql-connector.version}</version>
     </dependency>
 
     <dependency>
@@ -149,6 +159,16 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <jvmArguments>
+            -server
+            -Xmx512m -Xss256k
+            -XX:+PerfDisableSharedMem
+            -Dcom.sun.management.jmxremote=true
+            -Dcom.sun.management.jmxremote.authenticate=false
+            -Dcom.sun.management.jmxremote.ssl=false
+          </jvmArguments>
+        </configuration>
       </plugin>
 
       <plugin>
