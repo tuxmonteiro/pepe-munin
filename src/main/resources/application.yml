@@ -5,17 +5,17 @@ build:
 
 spring:
   datasource:
-    driver-class-name: ${DB_API_DRIVER:org.h2.Driver}
-    url: ${DB_API_URL:jdbc:h2:mem:test;MODE=MySQL}
-    username: ${DB_API_USER:sa}
-    password: ${DB_API_PASSWORD:}
+    driver-class-name: ${DB_MUNIN_DRIVER:org.h2.Driver}
+    url: ${DB_MUNIN_URL:jdbc:h2:mem:test;MODE=MySQL}
+    username: ${DB_MUNIN_USER:sa}
+    password: ${DB_MUNIN_PASSWORD:}
   jpa:
-    show-sql: ${DB_API_SHOWSQL:false}
+    show-sql: ${DB_MUNIN_SHOWSQL:false}
     hibernate:
-      ddl-auto: ${DB_API_DDL:create}
+      ddl-auto: ${DB_MUNIN_DDL:create}
     properties:
       hibernate:
-        dialect: ${DB_API_DIALECT:org.hibernate.dialect.H2Dialect}
+        dialect: ${DB_MUNIN_DIALECT:org.hibernate.dialect.H2Dialect}
   pid:
     file: ${PID_FILE:/tmp/pepe-chapolin.pid}
 
@@ -31,8 +31,9 @@ pepe:
     source: ${MUNIN_SOURCE:munin}
     fixedDelay: ${SCHEDULER_TIME:30000}
     trigger_name: ${MUNIN_TRIGGER:acs-collector}
-  server:
-    port: ${SERVER_PORT:8000}
+
+server:
+  port: ${SERVER_PORT:8000}
 
 cors:
   allowed-origins: ${CORS_ORIGINS:http://localhost}
