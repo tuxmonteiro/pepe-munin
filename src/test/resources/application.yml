@@ -27,8 +27,9 @@ pepe:
     source: ${MUNIN_SOURCE:munin}
     fixedDelay: ${SCHEDULER_TIME:30000}
     trigger_name: ${MUNIN_TRIGGER:acs-collector}
-  server:
-    port: ${SERVER_PORT:8000}
+
+server:
+  port: ${SERVER_PORT:8000}
 
 cors:
   allowed-origins: ${CORS_ORIGINS:http://localhost}
