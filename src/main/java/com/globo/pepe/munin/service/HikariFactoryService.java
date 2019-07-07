@@ -25,6 +25,11 @@ import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.munin.repository.DriverRepository;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
@@ -32,20 +37,14 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.sql.DataSource;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 @Service
 public class HikariFactoryService {
@@ -57,6 +56,10 @@ public class HikariFactoryService {
 
         DriverShim(java.sql.Driver driver) {
             this.driver = driver;
+        }
+
+        java.sql.Driver getRealDriver() {
+            return driver;
         }
 
         @Override
@@ -96,7 +99,6 @@ public class HikariFactoryService {
     }
 
     private final DriverRepository driverRepository;
-    private final Map<String, java.sql.Driver> driversRegistered = new HashMap<>();
 
     public HikariFactoryService(JsonLoggerService loggerService,
         DriverRepository driverRepository) {
@@ -106,27 +108,43 @@ public class HikariFactoryService {
 
     @Scheduled(fixedRate = 10_000)
     public void syncDriverRegistered() {
-        final List<com.globo.pepe.common.model.munin.Driver> driverList = driverRepository.findByType(Type.JDBC);
+        final List<Driver> muninDriverList = driverRepository.findByTypeAndJarNotNull(Type.JDBC);
+        final List<java.sql.Driver> sqlDrivers = DriverManager.drivers().collect(Collectors.toList());
+        final Map<String, Object> driversRegisteredMap = extractDriverMap(sqlDrivers);
+        registerNewDrivers(muninDriverList, driversRegisteredMap);
+        deregisterObsoleteDrivers(muninDriverList, driversRegisteredMap);
+    }
 
-        loggerService.newLogger(getClass())
-            .message("Drivers: registered -> " + driversRegistered.size() + " / persisted (DB) -> " + driverList.size()).sendInfo();
-        driverList.forEach(driver -> {
-            String driverClassName = driver.getName();
-            if (!driversRegistered.keySet().contains(driverClassName)) {
-                DriverShim driverShim = registerDriver(new SimpleImmutableEntry<>(driverClassName, driver.getJar()));
-                driversRegistered.put(driverClassName, driverShim);
-                loggerService.newLogger(getClass())
-                    .message(driverClassName + "/" + driver.getJar() + " driver registered").sendInfo();
+    private void deregisterObsoleteDrivers(final List<Driver> muninDriverList, final Map<String, Object> driversRegisteredMap) {
+        final List<String> driversToRemove = new ArrayList<>(driversRegisteredMap.keySet());
+        final Set<String> muninDriversName = extractDriverMap(muninDriverList).keySet();
+        driversToRemove.removeAll(muninDriversName);
+        driversToRemove.stream().filter(driversRegisteredMap::containsKey).forEach(className -> {
+            java.sql.Driver driver = (java.sql.Driver) driversRegisteredMap.get(className);
+            if (driver instanceof DriverShim && ((DriverShim)driver).getRealDriver().getClass().getName().equals(className)) {
+                try {
+                    DriverManager.deregisterDriver(driver);
+                    loggerService.newLogger(getClass())
+                            .message(className + " driver deregistered").sendInfo();
+                } catch (SQLException e) {
+                    loggerService.newLogger(getClass()).message(String.valueOf(e.getCause())).sendError(e);
+                }
             }
         });
-        final Set<String> driversToRemove = new HashSet<>(driversRegistered.keySet());
-        driversToRemove.removeAll(driverList.stream().map(Driver::getName).collect(Collectors.toSet()));
-        driversToRemove.forEach(className -> {
-            try {
-                DriverManager.deregisterDriver(driversRegistered.remove(className));
-            } catch (SQLException e) {
-                loggerService.newLogger(getClass())
-                    .message(e.getMessage()).sendError();
+    }
+
+    private void registerNewDrivers(final List<Driver> muninDriverList, final Map<String, Object> driversRegisteredMap) {
+        muninDriverList.forEach(driver -> {
+            final String driverClassName = driver.getName();
+            final String driverJar = driver.getJar();
+            if (!driversRegisteredMap.keySet().contains(driverClassName)) {
+                try {
+                    DriverManager.registerDriver(convertToSqlDriver(driverClassName, driverJar));
+                    loggerService.newLogger(getClass())
+                            .message(driverClassName + "@" + driverJar + " driver registered").sendInfo();
+                } catch (SQLException e) {
+                    loggerService.newLogger(getClass()).message(String.valueOf(e.getCause())).sendError();
+                }
             }
         });
     }
@@ -142,23 +160,20 @@ public class HikariFactoryService {
         return new HikariDataSource(config);
     }
 
-    private DriverShim registerDriver(Entry<String, String> driverEntries) {
-        final String driverClassName = driverEntries.getKey();
-        final String driverJar = driverEntries.getValue();
-
-        Assert.hasText(driverClassName, "Driver 'class_name' must not be null or empty!");
+    private DriverShim convertToSqlDriver(String driverClassName, String driverJar) {
+        Assert.hasText(driverClassName, "Driver 'name' must not be null or empty!");
         Assert.hasText(driverJar, "Driver 'jar' must not be null or empty!");
 
         DriverShim driverShim = null;
+        String driverLibJarPath = getDriverLibPath(driverJar);
         try {
-            String driverLibJarPath = getDriverLibPath(driverJar);
-            URL urlJarPath = new URL(driverLibJarPath);
-            URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{urlJarPath});
-            java.sql.Driver driver = (java.sql.Driver) Class.forName(driverClassName, true, urlClassLoader).getDeclaredConstructor().newInstance();
+            final URL urlJarPath = new URL(driverLibJarPath);
+            final URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{urlJarPath});
+            final java.sql.Driver driver = (java.sql.Driver)
+                    Class.forName(driverClassName, true, urlClassLoader).getDeclaredConstructor().newInstance();
             driverShim = new DriverShim(driver);
-            DriverManager.registerDriver(driverShim);
         } catch (Exception e) {
-            e.printStackTrace();
+            loggerService.newLogger(getClass()).message(String.valueOf(e.getCause())).sendError(e);
         }
 
         return driverShim;
@@ -166,6 +181,31 @@ public class HikariFactoryService {
 
     private String getDriverLibPath(String driverJar) {
         return "jar:file:" + driverJar + "!/";
+    }
+
+    private Map<String, Object> extractDriverMap(final List<?> drivers) {
+        final Map<String, Object> driverMap = new HashMap<>();
+        drivers.forEach(driver -> {
+            if (driver instanceof java.sql.Driver) {
+                String driverName = getRealClassName((java.sql.Driver) driver);
+                loggerService.newLogger(getClass()).message(driverName + " already loaded").sendInfo();
+                driverMap.put(driverName, driver);
+            } else if (driver instanceof Driver) {
+                driverMap.put(((Driver)driver).getName(), driver);
+            }
+        });
+        return driverMap;
+    }
+
+    private String getRealClassName(java.sql.Driver sqlDriver) {
+        String driverName;
+        final Class<? extends java.sql.Driver> driverClass = sqlDriver.getClass();
+        if (DriverShim.class.getName().equals(driverClass.getName())) {
+            driverName = ((DriverShim) sqlDriver).getRealDriver().getClass().getName();
+        } else {
+            driverName = driverClass.getName();
+        }
+        return driverName;
     }
 
 }
