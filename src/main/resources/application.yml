@@ -34,6 +34,7 @@ pepe:
     jdbc:
       register-sched-delay: ${MUNIN_JDBC_REGISTER_DELAY:20000}
       datasource-cache-ttl: ${MUNIN_DATASOURCE_CACHE_TTL:120000}
+  secret: ${PEPE_SECRET:mysecret}
 
 server:
   port: ${SERVER_PORT:8000}
