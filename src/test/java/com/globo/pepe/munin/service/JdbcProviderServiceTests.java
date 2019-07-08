@@ -39,10 +39,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class SofiaProviderServiceTests {
+public class JdbcProviderServiceTests {
 
     @MockBean
-    private SofiaProviderService sofiaRepository;
+    private JdbcProviderService jdbcProviderService;
 
     @Test
     public void findByMetricsTest() {
@@ -52,8 +52,8 @@ public class SofiaProviderServiceTests {
         metricValue.put("ram","00");
         metricValue.put("so","linux");
         metrics.add(metricValue);
-        Mockito.when(sofiaRepository.findByMetrics(anyString(), any(Connection.class))).thenReturn(metrics);
-        metrics = sofiaRepository.findByMetrics(anyString(), any(Connection.class));
+        Mockito.when(jdbcProviderService.findByMetrics(anyString(), any(Connection.class))).thenReturn(metrics);
+        metrics = jdbcProviderService.findByMetrics(anyString(), any(Connection.class));
         assertThat(metrics, Matchers.notNullValue());
     }
 

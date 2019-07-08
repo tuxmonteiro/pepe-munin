@@ -43,17 +43,17 @@ public class MuninService {
     private final ObjectMapper mapper;
     private final JsonLoggerService jsonLoggerService;
 
-    private final SofiaProviderService sofiaProviderService;
+    private final JdbcProviderService jdbcProviderService;
 
     public MuninService(
             MetricRepository metricRepository,
-            SofiaProviderService sofiaProviderService,
+            JdbcProviderService jdbcProviderService,
             PepeApiService pepeApiService,
             KeystoneService keystoneService,
             ObjectMapper mapper,
             JsonLoggerService jsonLoggerService) {
         this.metricRepository = metricRepository;
-        this.sofiaProviderService = sofiaProviderService;
+        this.jdbcProviderService = jdbcProviderService;
         this.pepeApiService = pepeApiService;
         this.keystoneService = keystoneService;
         this.mapper = mapper;
@@ -75,7 +75,7 @@ public class MuninService {
                     String queryWorker = metric.getQuery();
                     final List<Map<String, Object>> allTable = new ArrayList<>();
                     if (Driver.Type.JDBC.equals(muninConnection.getDriver().getType())) {
-                        allTable.addAll(sofiaProviderService.findByMetrics(queryWorker, muninConnection));
+                        allTable.addAll(jdbcProviderService.findByMetrics(queryWorker, muninConnection));
                     }
                     int count = 0;
                     for (Map<String, Object> row : allTable) {

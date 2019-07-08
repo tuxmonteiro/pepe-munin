@@ -35,12 +35,12 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SofiaProviderService {
+public class JdbcProviderService {
 
     private final JsonLoggerService jsonLoggerService;
     private final HikariFactoryService hikariFactoryService;
 
-    public SofiaProviderService(
+    public JdbcProviderService(
             JsonLoggerService jsonLoggerService,
             HikariFactoryService hikariFactoryService) {
 

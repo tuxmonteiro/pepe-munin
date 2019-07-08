@@ -57,7 +57,7 @@ import org.springframework.test.context.junit4.SpringRunner;
     KeystoneService.class,
     JsonLoggerService.class,
     ObjectMapper.class,
-    SofiaProviderService.class
+    JdbcProviderService.class
 })
 public class MuninServiceTest {
 
@@ -68,18 +68,16 @@ public class MuninServiceTest {
     private ObjectMapper mapper;
 
     @MockBean
-    private SofiaProviderService sofiaProviderService;
+    private JdbcProviderService jdbcProviderService;
 
     @MockBean
     private PepeApiService pepeApiService;
 
     private JsonNode metricValueJson = null;
 
-    private static ClientAndServer keystoneServerMock;
-
     @BeforeClass
     public static void setupClass() throws IOException {
-        keystoneServerMock = ClientAndServer.startClientAndServer(5000);
+        ClientAndServer keystoneServerMock = ClientAndServer.startClientAndServer(5000);
 
         InputStream resourceAuthOk = MuninServiceTest.class.getResourceAsStream("/keystone-auth.json");
         String bodyAuthOk = IOUtils.toString(resourceAuthOk, Charset.defaultCharset());
@@ -134,7 +132,7 @@ public class MuninServiceTest {
         metrics.add(metricValue);
         metricValueJson = mapper.valueToTree(metricValue);
 
-        when(sofiaProviderService.findByMetrics(anyString(), any(Connection.class))).thenReturn(metrics);
+        when(jdbcProviderService.findByMetrics(anyString(), any(Connection.class))).thenReturn(metrics);
     }
 
     @Test
