@@ -33,7 +33,7 @@ pepe:
     trigger_name: ${MUNIN_TRIGGER:acs-collector}
     jdbc:
       register-sched-delay: ${MUNIN_JDBC_REGISTER_DELAY:20000}
-      datasource-cache-ttl: ${MUNIN_DATASOURCE_CACHE_TTL:60000}
+      datasource-cache-ttl: ${MUNIN_DATASOURCE_CACHE_TTL:120000}
 
 server:
   port: ${SERVER_PORT:8000}
