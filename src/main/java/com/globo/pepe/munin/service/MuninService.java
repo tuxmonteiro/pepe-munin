@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class MuninService {
@@ -44,7 +43,6 @@ public class MuninService {
     private final ObjectMapper mapper;
     private final JsonLoggerService jsonLoggerService;
 
-    private final ConcurrentHashMap<Long, SofiaProviderService> jbdcProviders =  new ConcurrentHashMap<>();
     private final SofiaProviderService sofiaProviderService;
 
     public MuninService(
