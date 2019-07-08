@@ -50,21 +50,20 @@ public class SofiaProviderService {
 
     public  List<Map<String, Object>> findByMetrics(String query, Connection muninConnection) {
         try {
-            String url = muninConnection.getUrl();
-            String login = muninConnection.getLogin();
-            String password = muninConnection.getPassword();
-            final DataSource datasource = hikariFactoryService.dataSource(url, login, password);
-            final PreparedStatement pstmt =  datasource.getConnection().prepareStatement(query);
-            final ResultSet resultSet = pstmt.executeQuery();
-            final ResultSetMetaData metadata = resultSet.getMetaData();
-            int columns = metadata.getColumnCount();
             final List<Map<String, Object>> resultList = new ArrayList<>();
-            while (resultSet.next()){
-                Map<String, Object> row = new HashMap<>(columns);
-                for(int columnPos=1; columnPos<=columns; ++columnPos){
-                    row.put(metadata.getColumnName(columnPos), resultSet.getObject(columnPos));
+            final DataSource datasource = hikariFactoryService.dataSource(muninConnection);
+            try (final java.sql.Connection connection = datasource.getConnection()) {
+                final PreparedStatement pstmt = connection.prepareStatement(query);
+                final ResultSet resultSet = pstmt.executeQuery();
+                final ResultSetMetaData metadata = resultSet.getMetaData();
+                int columns = metadata.getColumnCount();
+                while (resultSet.next()) {
+                    Map<String, Object> row = new HashMap<>(columns);
+                    for (int columnPos = 1; columnPos <= columns; ++columnPos) {
+                        row.put(metadata.getColumnName(columnPos), resultSet.getObject(columnPos));
+                    }
+                    resultList.add(row);
                 }
-                resultList.add(row);
             }
             return resultList;
         } catch (Exception e) {

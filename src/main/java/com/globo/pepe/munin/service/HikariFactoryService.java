@@ -19,6 +19,8 @@
 
 package com.globo.pepe.munin.service;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.globo.pepe.common.model.munin.Driver;
 import com.globo.pepe.common.model.munin.Driver.Type;
 import com.globo.pepe.common.services.JsonLoggerService;
@@ -42,14 +44,13 @@ import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,34 +60,7 @@ public class HikariFactoryService {
 
     private final JsonLoggerService loggerService;
 
-    private final Long dataSourceCacheTtl;
-
-    private class CacheDB {
-
-        private final Map<String, DataSource> dataSourceMap = new ConcurrentHashMap<>();
-        private final Map<String, Long> ttlMap = new ConcurrentHashMap<>();
-
-        synchronized DataSource get(String key) {
-            checkTtl(key);
-            return dataSourceMap.get(key);
-        }
-
-        synchronized DataSource put(String key, DataSource dataSource) {
-            ttlMap.put(key, System.currentTimeMillis());
-            return dataSourceMap.put(key, dataSource);
-        }
-
-        private void checkTtl(String key) {
-            final Long ttl;
-            if ((ttl = ttlMap.get(key)) != null &&
-                 ttl < System.currentTimeMillis() - Optional.ofNullable(dataSourceCacheTtl).orElse(10000L)) {
-
-                ttlMap.remove(key);
-                final HikariDataSource dataSource = (HikariDataSource) dataSourceMap.remove(key);
-                dataSource.close();
-            }
-        }
-    }
+    private final LoadingCache<com.globo.pepe.common.model.munin.Connection, DataSource> cache;
 
     private static class DriverShim implements java.sql.Driver {
 
@@ -136,16 +110,35 @@ public class HikariFactoryService {
         }
     }
 
-    private final CacheDB cacheDB = new CacheDB();
-
     private final DriverRepository driverRepository;
 
     public HikariFactoryService(JsonLoggerService loggerService,
                                 DriverRepository driverRepository,
                                 @Value("${pepe.munin.jdbc.datasource-cache-ttl}") Long dataSourceCacheTtl) {
         this.loggerService = loggerService;
-        this.dataSourceCacheTtl = dataSourceCacheTtl;
         this.driverRepository = driverRepository;
+        this.cache = Caffeine.newBuilder()
+                .maximumSize(1000)
+                .expireAfterAccess(dataSourceCacheTtl, TimeUnit.MILLISECONDS)
+                .removalListener((key, value, cause) -> {
+                    if (value instanceof HikariDataSource) {
+                        try {
+                            final String logMsg = "Closing " + ((com.globo.pepe.common.model.munin.Connection) Objects.requireNonNull(key)).getUrl();
+                            loggerService.newLogger(getClass()).message(logMsg).sendWarn();
+                            ((HikariDataSource) value).close();
+                        } catch (Exception ignored) {
+                            // ignored
+                        }
+                    }
+                }).build(this::newDataSource);
+    }
+
+    private DataSource newDataSource(com.globo.pepe.common.model.munin.Connection muninConnection) {
+        String url = muninConnection.getUrl();
+        String login = muninConnection.getLogin();
+        String password = muninConnection.getPassword();
+        loggerService.newLogger(getClass()).message("Building a new datasource (" + url.split("[?]")[0] + ")").sendInfo();
+        return new HikariDataSource(getHikariConfig(url, login, password));
     }
 
     @Scheduled(fixedDelayString = "${pepe.munin.jdbc.register-sched-delay}")
@@ -191,13 +184,8 @@ public class HikariFactoryService {
         });
     }
 
-    public synchronized DataSource dataSource(String jdbcUrl, String username, String password) {
-        final DataSource dataSource;
-        String dataSourceKey = Base64.getEncoder().encodeToString((jdbcUrl + username + password).getBytes());
-        if ((dataSource = cacheDB.get(dataSourceKey)) != null) {
-            return dataSource;
-        }
-        return cacheDB.put(dataSourceKey, new HikariDataSource(getHikariConfig(jdbcUrl, username, password)));
+    public DataSource dataSource(com.globo.pepe.common.model.munin.Connection connection) {
+        return cache.get(connection);
     }
 
     private HikariConfig getHikariConfig(String jdbcUrl, String username, String password) {
