@@ -26,7 +26,10 @@ pepe:
   munin:
     source: ${MUNIN_SOURCE:munin}
     send-sched-delay: ${MUNIN_SEND_SCHED_DELAY:30000}
-    trigger_name: ${MUNIN_TRIGGER:acs-collector}
+    jdbc:
+        register-sched-delay: 20000
+        datasource-cache-ttl: 120000
+  secret: mysecret
 
 server:
   port: ${SERVER_PORT:8000}

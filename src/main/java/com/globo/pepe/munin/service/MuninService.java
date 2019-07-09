@@ -67,6 +67,7 @@ public class MuninService {
                 final Project project = metric.getProject();
                 final Keystone keystone = project.getKeystone();
                 final Connection muninConnection = metric.getConnection();
+                final String triggerName = metric.getTrigger();
                 if (muninConnection == null) {
                     jsonLoggerService.newLogger(getClass()).message("Munin Connection not defined").sendWarn();
                     return;
@@ -82,7 +83,7 @@ public class MuninService {
                         JsonNode metricJson = mapper.valueToTree(row);
                         String projectName = project.getName();
                         String tokenId = keystoneService.getTokenId();
-                        if (pepeApiService.sendMetrics(metricJson, projectName, tokenId)) {
+                        if (pepeApiService.sendMetrics(metricJson, projectName, tokenId, triggerName)) {
                             count++;
                         }
                     }

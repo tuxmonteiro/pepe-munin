@@ -43,9 +43,6 @@ public class PepeApiService {
     @Value("${pepe.munin.source}")
     private String source;
 
-    @Value("${pepe.munin.trigger_name}")
-    private String triggerName;
-
     private final RestTemplate restTemplate;
     private final JsonLoggerService jsonLoggerService;
 
@@ -54,14 +51,14 @@ public class PepeApiService {
         this.jsonLoggerService = jsonLoggerService;
     }
 
-    boolean sendMetrics(JsonNode metric, String project, String tokenId){
+    boolean sendMetrics(JsonNode metric, String project, String tokenId, String triggerName){
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("X-Auth-Token", tokenId);
 
         try {
-            final Event event = buildEntity(metric, project);
+            final Event event = buildEntity(metric, project, triggerName);
             HttpEntity<Event> request = new HttpEntity<>(event, headers);
             restTemplate.exchange(pepeApiEndpoint + "/event", HttpMethod.POST, request, JsonNode.class);
             return true;
@@ -72,7 +69,7 @@ public class PepeApiService {
         return false;
     }
 
-    Event buildEntity(JsonNode metric, String project) {
+    Event buildEntity(JsonNode metric, String project, String triggerName) {
         Metadata metadata = new Metadata();
         metadata.setSource(source);
         metadata.setProject(project);

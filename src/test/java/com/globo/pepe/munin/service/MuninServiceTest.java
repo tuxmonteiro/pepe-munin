@@ -31,6 +31,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.model.munin.Connection;
 import com.globo.pepe.common.services.JsonLoggerService;
+import com.globo.pepe.munin.configuration.RepositoryConfiguration;
+import com.globo.pepe.munin.repository.ConnectionRepository;
+import com.globo.pepe.munin.repository.DriverRepository;
+import com.globo.pepe.munin.repository.MetricRepository;
+import com.globo.pepe.munin.repository.ProjectRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -46,18 +51,28 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockserver.integration.ClientAndServer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest({
+@SpringBootTest(classes = {
     MuninService.class,
     PepeApiService.class,
     KeystoneService.class,
     JsonLoggerService.class,
     ObjectMapper.class,
-    JdbcProviderService.class
+    JdbcProviderService.class,
+    HikariFactoryService.class,
+    JdbcProviderService.class,
+    JdbcDriverRegisterService.class,
+    ConnectionRepository.class,
+    DriverRepository.class,
+    MetricRepository.class,
+    ProjectRepository.class,
+    RepositoryConfiguration.class
 })
 public class MuninServiceTest {
 
@@ -138,6 +153,6 @@ public class MuninServiceTest {
     @Test
     public void sendWithUserAndPasswordOkTest() {
         muninService.send();
-        verify(pepeApiService, Mockito.atLeastOnce()).sendMetrics(metricValueJson, "admin", null);
+        verify(pepeApiService, Mockito.atLeastOnce()).sendMetrics(metricValueJson, "admin", null, "mytrigger");
     }
 }

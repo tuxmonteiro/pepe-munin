@@ -67,7 +67,8 @@ public class PepeApiServiceTest  {
     public void buildRequestTest() {
         String project = UUID.randomUUID().toString();
         JsonNode metric = getMetricMock();
-        final Event event = pepeApiService.buildEntity(metric, project);
+        String triggerName = "acs-collector";
+        final Event event = pepeApiService.buildEntity(metric, project, triggerName);
         assertEquals(event.getMetadata().getProject(), project);
         assertEquals(event.getPayload(), metric);
     }
@@ -77,6 +78,7 @@ public class PepeApiServiceTest  {
         String project = UUID.randomUUID().toString();
         String tokenId = UUID.randomUUID().toString();
         JsonNode metric = getMetricMock();
+        String triggerName = "acs-collector";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -84,11 +86,11 @@ public class PepeApiServiceTest  {
 
         final Event event = new Event();
 
-        when(pepeApiService.buildEntity(metric, project)).thenReturn(event);
+        when(pepeApiService.buildEntity(metric, project, triggerName)).thenReturn(event);
 
         HttpEntity<Event> request = new HttpEntity<>(event, headers);
 
-        pepeApiService.sendMetrics(metric, project, tokenId);
+        pepeApiService.sendMetrics(metric, project, tokenId, triggerName);
         verify(restTemplate, Mockito.atLeastOnce()).exchange(pepeApiEndpoint + "/event", HttpMethod.POST, request, JsonNode.class);
     }
 
