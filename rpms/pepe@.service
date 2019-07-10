@@ -23,6 +23,8 @@ ExecStart=/bin/bash -l -c "\
   -Dlogging.config=/opt/pepe/%i/conf/log4j.xml \
   -Djavax.net.ssl.keyStore=/etc/pki/java/cacerts \
   -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts \
+  -Djavax.net.ssl.keyStorePassword=changeit \
+  -Djavax.net.ssl.trustStorePassword=changeit \
   -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector \
   ${JAVA_VMS} \
   ${JAVA_VMX} \
