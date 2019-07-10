@@ -20,10 +20,15 @@
 package com.globo.pepe.munin.repository;
 
 import com.globo.pepe.common.model.munin.Metric;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(path = "metric", collectionResourceRel = "metric", itemResourceRel = "metric", exported = false)
 public interface MetricRepository extends JpaRepository<Metric, Long> {
+
+    @Query(value = "SELECT m.id FROM metric as m WHERE (m.last_processing - CURRENT_TIMESTAMP) > m.interval_time", nativeQuery = true)
+    List<Long> selectAllByLastProcessing();
 
 }

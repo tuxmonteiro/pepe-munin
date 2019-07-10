@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.model.munin.Connection;
 import com.globo.pepe.common.model.munin.Driver;
 import com.globo.pepe.common.model.munin.Keystone;
+import com.globo.pepe.common.model.munin.Metric;
 import com.globo.pepe.common.model.munin.Project;
 import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.munin.repository.MetricRepository;
@@ -60,42 +61,50 @@ public class MuninService {
         this.jsonLoggerService = jsonLoggerService;
     }
 
+    @Scheduled(fixedDelayString = "${pepe.munin.min-sched-delay}")
+    public void tick() {
+        // TODO
+    }
+
     @Scheduled(fixedDelayString = "${pepe.munin.send-sched-delay}")
     public void send() {
-        metricRepository.findAll().forEach(metric -> {
-            try {
-                final Project project = metric.getProject();
-                final Keystone keystone = project.getKeystone();
-                final Connection muninConnection = metric.getConnection();
-                final String triggerName = metric.getTrigger();
-                if (muninConnection == null) {
-                    jsonLoggerService.newLogger(getClass()).message("Munin Connection not defined").sendWarn();
-                    return;
-                }
-                if (keystoneService.authenticate(project.getName(), keystone.getLogin(), keystone.getPassword())) {
-                    String queryWorker = metric.getQuery();
-                    final List<Map<String, Object>> allTable = new ArrayList<>();
-                    if (Driver.Type.JDBC.equals(muninConnection.getDriver().getType())) {
-                        allTable.addAll(jdbcProviderService.findByMetrics(queryWorker, muninConnection));
-                    }
-                    int count = 0;
-                    for (Map<String, Object> row : allTable) {
-                        JsonNode metricJson = mapper.valueToTree(row);
-                        String projectName = project.getName();
-                        String tokenId = keystoneService.getTokenId();
-                        if (pepeApiService.sendMetrics(metricJson, projectName, tokenId, triggerName)) {
-                            count++;
-                        }
-                    }
-                    jsonLoggerService.newLogger(getClass())
-                        .message("sent " + count + "/" + allTable.size() + " events to pepe-api").sendInfo();
-                }
-            } catch (Exception e) {
-                final String erroMsg = String.valueOf(e.getCause());
-                jsonLoggerService.newLogger(getClass()).message(erroMsg).sendError();
-                jsonLoggerService.newLogger(getClass()).message(erroMsg).sendDebug(e);
+        metricRepository.findAll().stream()
+            .filter(Metric::getEnable).forEach(this::metricProcessing);
+    }
+
+    private void metricProcessing(Metric metric) {
+        try {
+            final Project project = metric.getProject();
+            final Keystone keystone = project.getKeystone();
+            final Connection muninConnection = metric.getConnection();
+            final String triggerName = metric.getTrigger();
+            if (muninConnection == null) {
+                jsonLoggerService.newLogger(getClass()).message("Munin Connection not defined").sendWarn();
+                return;
             }
-        });
+            if (keystoneService.authenticate(project.getName(), keystone.getLogin(), keystone.getPassword())) {
+                String queryWorker = metric.getQuery();
+                final List<Map<String, Object>> allTable = new ArrayList<>();
+                if (Driver.Type.JDBC.equals(muninConnection.getDriver().getType())) {
+                    allTable.addAll(jdbcProviderService.findByMetrics(queryWorker, muninConnection));
+                }
+                int count = 0;
+                for (Map<String, Object> row : allTable) {
+                    JsonNode metricJson = mapper.valueToTree(row);
+                    String projectName = project.getName();
+                    String tokenId = keystoneService.getTokenId();
+                    if (pepeApiService.sendMetrics(metricJson, projectName, tokenId, triggerName)) {
+                        count++;
+                    }
+                }
+                jsonLoggerService.newLogger(getClass())
+                    .message("sent " + count + "/" + allTable.size() + " events to pepe-api").sendInfo();
+            }
+        } catch (Exception e) {
+            final String erroMsg = String.valueOf(e.getCause());
+            jsonLoggerService.newLogger(getClass()).message(erroMsg).sendError();
+            jsonLoggerService.newLogger(getClass()).message(erroMsg).sendDebug(e);
+        }
     }
 
 }
