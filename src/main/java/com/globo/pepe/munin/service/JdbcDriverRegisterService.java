@@ -21,7 +21,13 @@ package com.globo.pepe.munin.service;
 
 import com.globo.pepe.common.model.munin.Driver;
 import com.globo.pepe.common.services.JsonLoggerService;
+import com.globo.pepe.munin.configuration.HttpClientConfiguration.HttpClient;
 import com.globo.pepe.munin.repository.DriverRepository;
+import java.io.FileOutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.asynchttpclient.AsyncCompletionHandler;
+import org.asynchttpclient.HttpResponseBodyPart;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -47,10 +53,16 @@ public class JdbcDriverRegisterService {
 
     private final JsonLoggerService loggerService;
     private final DriverRepository driverRepository;
+    private final HttpClient client;
 
-    public JdbcDriverRegisterService(JsonLoggerService loggerService, DriverRepository driverRepository) {
+    public JdbcDriverRegisterService(
+        JsonLoggerService loggerService,
+        DriverRepository driverRepository,
+        HttpClient client) {
+
         this.loggerService = loggerService;
         this.driverRepository = driverRepository;
+        this.client = client;
     }
 
     @Scheduled(fixedDelayString = "${pepe.munin.jdbc.register-sched-delay}")
@@ -83,7 +95,15 @@ public class JdbcDriverRegisterService {
     private void registerNewDrivers(final List<Driver> muninDriverList, final Map<String, Object> driversRegisteredMap) {
         muninDriverList.forEach(driver -> {
             final String driverClassName = driver.getName();
-            final String driverJar = driver.getJar();
+            String driverJar = driver.getJar();
+            if (driverJar.startsWith("http")) {
+                String localJarStr = "/tmp/" + driverJar.substring(driverJar.lastIndexOf("/") + 1);
+                Path localJar = Paths.get(localJarStr);
+                if (!localJar.toFile().exists()) {
+                    client.getAndSave(driverJar, localJarStr);
+                }
+                driverJar = localJarStr;
+            }
             if (!driversRegisteredMap.keySet().contains(driverClassName)) {
                 try {
                     DriverManager.registerDriver(convertToSqlDriver(driverClassName, driverJar));
