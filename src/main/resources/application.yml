@@ -29,8 +29,7 @@ pepe:
     domain: ${KEYSTONE_DOMAIN:default}
   munin:
     source: ${MUNIN_SOURCE:munin}
-    send-sched-delay: ${MUNIN_SEND_SCHED_DELAY:30000}
-    trigger_name: ${MUNIN_TRIGGER:acs-collector}
+    min-sched-delay: ${MUNIN_MIN_SCHED_DELAY:10000}
     jdbc:
       register-sched-delay: ${MUNIN_JDBC_REGISTER_DELAY:20000}
       datasource-cache-ttl: ${MUNIN_DATASOURCE_CACHE_TTL:120000}
