@@ -23,8 +23,9 @@ import com.globo.pepe.common.services.JsonLoggerService;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Map;
+import java.io.IOException;
 import javax.net.ssl.SSLException;
 import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
@@ -33,7 +34,6 @@ import org.asynchttpclient.HttpResponseBodyPart;
 import org.asynchttpclient.Response;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.Assert;
 
 @Configuration
 public class HttpClientConfiguration {
@@ -67,25 +67,26 @@ public class HttpClientConfiguration {
             }
         }
 
-        public void getAndSave(String url, String destPath) {
-            try (FileOutputStream stream = new FileOutputStream(destPath)) {
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        public void getAndSave(String url, String destPath) throws IOException {
+            final File file = new File(destPath);
+            file.createNewFile();
+            try (final FileOutputStream stream = new FileOutputStream(destPath)) {
                 asyncHttpClient.prepareGet(url).execute(new AsyncCompletionHandler<FileOutputStream>() {
 
                     @Override
-                    public State onBodyPartReceived(HttpResponseBodyPart bodyPart)
-                        throws Exception {
+                    public State onBodyPartReceived(HttpResponseBodyPart bodyPart) throws Exception {
                         stream.getChannel().write(bodyPart.getBodyByteBuffer());
                         return State.CONTINUE;
                     }
 
                     @Override
-                    public FileOutputStream onCompleted(Response response)
-                        throws Exception {
+                    public FileOutputStream onCompleted(Response response) throws Exception {
                         return stream;
                     }
                 });
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (RuntimeException e) {
+                loggerService.newLogger(getClass()).message(String.valueOf(e.getCause())).sendError();
             }
         }
     }
