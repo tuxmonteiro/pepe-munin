@@ -21,13 +21,12 @@ package com.globo.pepe.munin.service;
 
 import com.globo.pepe.common.model.munin.Driver;
 import com.globo.pepe.common.services.JsonLoggerService;
+import com.globo.pepe.munin.configuration.HttpClientConfiguration.HttpClient;
 import com.globo.pepe.munin.repository.DriverRepository;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
@@ -41,16 +40,29 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 @Service
 public class JdbcDriverRegisterService {
 
     private final JsonLoggerService loggerService;
     private final DriverRepository driverRepository;
+    private final HttpClient client;
+    private final String jarLocalDir;
 
-    public JdbcDriverRegisterService(JsonLoggerService loggerService, DriverRepository driverRepository) {
+    public JdbcDriverRegisterService(
+        JsonLoggerService loggerService,
+        DriverRepository driverRepository,
+        HttpClient client,
+        @Value("${pepe.munin.jar-local-dir:/tmp}") String jarLocalDir) {
+
         this.loggerService = loggerService;
         this.driverRepository = driverRepository;
+        this.client = client;
+        this.jarLocalDir = jarLocalDir != null ? (!jarLocalDir.endsWith("/") ? jarLocalDir + "/" : jarLocalDir) : "/tmp/";
     }
 
     @Scheduled(fixedDelayString = "${pepe.munin.jdbc.register-sched-delay}")
@@ -83,15 +95,24 @@ public class JdbcDriverRegisterService {
     private void registerNewDrivers(final List<Driver> muninDriverList, final Map<String, Object> driversRegisteredMap) {
         muninDriverList.forEach(driver -> {
             final String driverClassName = driver.getName();
-            final String driverJar = driver.getJar();
-            if (!driversRegisteredMap.keySet().contains(driverClassName)) {
-                try {
-                    DriverManager.registerDriver(convertToSqlDriver(driverClassName, driverJar));
-                    loggerService.newLogger(getClass())
-                            .message(driverClassName + "@" + driverJar + " driver registered").sendInfo();
-                } catch (SQLException e) {
-                    loggerService.newLogger(getClass()).message(String.valueOf(e.getCause())).sendError();
+            String driverJar = driver.getJar();
+            String localJarStr = driverJar.startsWith("http") ? jarLocalDir + driverJar.substring(driverJar.lastIndexOf("/") + 1) : jarLocalDir;
+            Path localJar = Paths.get(localJarStr);
+            try {
+                if (!localJar.toFile().exists()) {
+                    client.getAndSave(driverJar, localJarStr);
                 }
+                if (!driversRegisteredMap.keySet().contains(driverClassName)) {
+                    try {
+                        DriverManager.registerDriver(convertToSqlDriver(driverClassName, localJarStr));
+                        loggerService.newLogger(getClass())
+                            .message(driverClassName + "@" + localJarStr + " driver registered").sendInfo();
+                    } catch (SQLException e) {
+                        loggerService.newLogger(getClass()).message(String.valueOf(e.getCause())).sendError();
+                    }
+                }
+            } catch (Exception e) {
+                loggerService.newLogger(getClass()).message("Error when loading " + driverJar + " (" + localJarStr + ") with error: " + e.getCause());
             }
         });
     }
