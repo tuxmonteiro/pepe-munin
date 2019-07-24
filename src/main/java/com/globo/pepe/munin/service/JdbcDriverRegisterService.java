@@ -126,6 +126,7 @@ public class JdbcDriverRegisterService {
         try {
             final URL urlJarPath = new URL(driverLibJarPath);
             final URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{urlJarPath});
+
             final java.sql.Driver driver = (java.sql.Driver)
                     Class.forName(driverClassName, true, urlClassLoader).getDeclaredConstructor().newInstance();
             driverShim = new DriverShim(driver);

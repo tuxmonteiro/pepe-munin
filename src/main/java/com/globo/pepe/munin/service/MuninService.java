@@ -29,8 +29,6 @@ import com.globo.pepe.common.model.munin.Project;
 import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.munin.repository.MetricRepository;
 import java.util.Date;
-import org.springframework.jms.annotation.JmsListener;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -41,14 +39,12 @@ import java.util.Map;
 @Service
 public class MuninService {
 
-    private static final String METRICS_QUEUE = "metrics-queue";
 
     private final MetricRepository metricRepository;
     private final PepeApiService pepeApiService;
     private final KeystoneService keystoneService;
     private final ObjectMapper mapper;
     private final JsonLoggerService jsonLoggerService;
-    private final JmsTemplate jmsTemplate;
     private final JdbcProviderService jdbcProviderService;
 
     public MuninService(
@@ -57,27 +53,22 @@ public class MuninService {
             PepeApiService pepeApiService,
             KeystoneService keystoneService,
             ObjectMapper mapper,
-            JsonLoggerService jsonLoggerService,
-            JmsTemplate jmsTemplate) {
+            JsonLoggerService jsonLoggerService) {
         this.metricRepository = metricRepository;
         this.jdbcProviderService = jdbcProviderService;
         this.pepeApiService = pepeApiService;
         this.keystoneService = keystoneService;
         this.mapper = mapper;
         this.jsonLoggerService = jsonLoggerService;
-        this.jmsTemplate = jmsTemplate;
     }
 
     @Scheduled(fixedDelayString = "${pepe.munin.min-sched-delay:10000}")
     public void tick() {
         // TODO: join both queries in just one
         final List<Long> ids = metricRepository.selectAllByNeedToProcess();
-        metricRepository.findByIdIn(ids).forEach(metric -> jmsTemplate.convertAndSend(METRICS_QUEUE, metric));
+        metricRepository.findByIdIn(ids).forEach(metric -> this.metricProcessing(metric));
     }
 
-    // TODO: Queue name = Metric Name (One queue per metric = parallel processing)
-    // TODO: Move to AMQP (RabbitMQ) approach
-    @JmsListener(destination = METRICS_QUEUE, concurrency = "4-4")
     private void metricProcessing(Metric metric) {
         try {
             metric.setLastProcessing(new Date());

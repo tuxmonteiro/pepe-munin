@@ -31,7 +31,7 @@ public interface MetricRepository extends JpaRepository<Metric, Long> {
     @Query(value =
         "SELECT m.id FROM metric as m "
         + "WHERE m.metric_enable "
-        + "AND (UNIX_TIMESTAMP(CURRENT_TIMESTAMP) - UNIX_TIMESTAMP(m.last_processing)) > m.interval_time", nativeQuery = true)
+     , nativeQuery = true)
     List<Long> selectAllByNeedToProcess();
 
     List<Metric> findByIdIn(List<Long> ids);
