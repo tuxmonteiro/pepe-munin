@@ -76,7 +76,7 @@ public class MuninService {
             metricRepository.save(metric);
 
             jsonLoggerService.newLogger(getClass())
-                    .message("Metric " + metric.getName() + " (" + metric.getId() + ") processed at " + processDate).sendInfo();
+                    .message("Metric " + metric.getName() + " (" + metric.getId() + ") with query '" + metric.getQuery() + "' processed at " + processDate).sendInfo();
 
             final Project project = metric.getProject();
             final Keystone keystone = project.getKeystone();
@@ -101,6 +101,7 @@ public class MuninService {
                         count++;
                     }
                 }
+
                 jsonLoggerService.newLogger(getClass())
                     .message("sent " + count + "/" + allTable.size() + " events to pepe-api").sendInfo();
             }
