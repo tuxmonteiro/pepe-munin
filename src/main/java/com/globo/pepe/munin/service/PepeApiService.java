@@ -81,6 +81,9 @@ public class PepeApiService {
         event.setMetadata(metadata);
         event.setPayload(metric);
 
+        jsonLoggerService.newLogger(getClass())
+                .message("Build event post: {'project': " + project + ", 'triggerName':  " + triggerName + ", 'metric': " + metric + "}").sendInfo();
+
         return event;
     }
 
