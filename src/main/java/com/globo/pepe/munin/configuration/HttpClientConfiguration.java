@@ -56,12 +56,12 @@ public class HttpClientConfiguration {
         public HttpClient() {
             try {
                 this.asyncHttpClient = Dsl.asyncHttpClient(Dsl.config()
-                    .setConnectionTtl(10000)
-                    .setPooledConnectionIdleTimeout(5000)
-                    .setMaxConnections(10)
-                    .setSslContext(
-                        SslContextBuilder.forClient().sslProvider(SslProvider.JDK).trustManager(InsecureTrustManagerFactory.INSTANCE).build())
-                    .build());
+                        .setConnectionTtl(10000)
+                        .setPooledConnectionIdleTimeout(5000)
+                        .setMaxConnections(10)
+                        .setSslContext(
+                                SslContextBuilder.forClient().sslProvider(SslProvider.JDK).trustManager(InsecureTrustManagerFactory.INSTANCE).build())
+                        .build());
             } catch (SSLException e) {
                 loggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
             }
@@ -71,7 +71,8 @@ public class HttpClientConfiguration {
         public void getAndSave(String url, String destPath) throws IOException {
             final File file = new File(destPath);
             file.createNewFile();
-            try (final FileOutputStream stream = new FileOutputStream(destPath)) {
+            final FileOutputStream stream = new FileOutputStream(file);
+            try {
                 asyncHttpClient.prepareGet(url).execute(new AsyncCompletionHandler<FileOutputStream>() {
 
                     @Override
@@ -82,10 +83,12 @@ public class HttpClientConfiguration {
 
                     @Override
                     public FileOutputStream onCompleted(Response response) throws Exception {
+                        if (stream != null) stream.close();
                         return stream;
                     }
                 });
             } catch (RuntimeException e) {
+                if (stream != null) stream.close();
                 loggerService.newLogger(getClass()).message(String.valueOf(e.getCause())).sendError();
             }
         }
