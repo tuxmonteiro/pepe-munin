@@ -71,8 +71,12 @@ public class MuninService {
 
     private void metricProcessing(Metric metric) {
         try {
-            metric.setLastProcessing(new Date());
+            Date processDate = new Date();
+            metric.setLastProcessing(processDate);
             metricRepository.save(metric);
+
+            jsonLoggerService.newLogger(getClass())
+                    .message("Metric " + metric.getName() + " (" + metric.getId() + ") processed at " + processDate).sendInfo();
 
             final Project project = metric.getProject();
             final Keystone keystone = project.getKeystone();
