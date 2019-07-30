@@ -29,13 +29,11 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 public interface MetricRepository extends JpaRepository<Metric, Long> {
 
     @Query(value =
-        "SELECT m.id FROM metric as m "
-        + "WHERE m.metric_enable "
+        "SELECT * FROM metric  "
+        + "WHERE metric_enable "
         + "AND (UNIX_TIMESTAMP(CURRENT_TIMESTAMP) - "
-        + "UNIX_TIMESTAMP(m.last_processing)) > m.interval_time"
+        + "UNIX_TIMESTAMP(last_processing)) > interval_time"
      , nativeQuery = true)
-    List<Long> selectAllByNeedToProcess();
-
-    List<Metric> findByIdIn(List<Long> ids);
+    List<Metric> selectAllByNeedToProcess();
 
 }

@@ -65,8 +65,7 @@ public class MuninService {
     @Scheduled(fixedDelayString = "${pepe.munin.min-sched-delay:10000}")
     public void tick() {
         // TODO: join both queries in just one
-        final List<Long> ids = metricRepository.selectAllByNeedToProcess();
-        metricRepository.findByIdIn(ids).forEach(metric -> this.metricProcessing(metric));
+    	metricRepository.selectAllByNeedToProcess().forEach(metric -> this.metricProcessing(metric));  
     }
 
     private void metricProcessing(Metric metric) {
