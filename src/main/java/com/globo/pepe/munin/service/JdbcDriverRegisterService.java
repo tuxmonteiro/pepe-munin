@@ -112,7 +112,7 @@ public class JdbcDriverRegisterService {
                     }
                 }
             } catch (Exception e) {
-                loggerService.newLogger(getClass()).message("Error when loading " + driverJar + " (" + localJarStr + ") with error: " + e.getCause());
+                loggerService.newLogger(getClass()).message("Error when loading " + driverJar + " (" + localJarStr + ") with error: " + e.getCause()).sendError();
             }
         });
     }
