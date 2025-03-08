@@ -61,7 +61,7 @@
     <java.version>11</java.version>
 
     <caffeine.version>2.7.0</caffeine.version>
-    <h2.version>1.4.199</h2.version>
+    <h2.version>1.4.200</h2.version>
     <mysql-connector.version>8.0.16</mysql-connector.version>
     <openstack4j.version>3.2.0</openstack4j.version>
     <pepe-common.version>1.1.1-SNAPSHOT</pepe-common.version>
